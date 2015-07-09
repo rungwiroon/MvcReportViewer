@@ -14,6 +14,7 @@ namespace MvcReportViewer.Example.Controllers
         private const string RemoteReportName = "/TestReports/TestReport";
         private const string LocalReportName = "App_Data/Reports/Products.rdlc";
         private const string LocalNoDataReportName = "App_Data/Reports/NoDataReport.rdlc";
+        private const string LocalEmbededReportName = "";
 
         public ActionResult Index()
         {

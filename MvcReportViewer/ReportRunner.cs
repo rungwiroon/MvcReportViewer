@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web.Mvc;
 using System.Data;
 using System.IO;
+using System.Collections;
 
 namespace MvcReportViewer
 {
@@ -104,6 +105,28 @@ namespace MvcReportViewer
             ParseParameters(reportParameters);
         }
 
+        public ReportRunner(
+            ReportFormat reportFormat,
+            string reportAssembly,
+            string reportEmbededName,
+            IEnumerable<KeyValuePair<string, object>> reportParameters,
+            ProcessingMode mode = ProcessingMode.Remote,
+            IDictionary<string, IEnumerable> localReportDataSources = null)
+        {
+            _reportFormat = reportFormat;
+
+            _viewerParameters.ProcessingMode = mode;
+            if (mode == ProcessingMode.Local && localReportDataSources != null)
+            {
+                _viewerParameters.LocalReportEnumerableDataSources = localReportDataSources;
+            }
+
+            _viewerParameters.ReportAssembly = reportAssembly;
+            _viewerParameters.ReportEmbeddedResource = reportEmbededName;
+
+            ParseParameters(reportParameters);
+        }
+
         // The property is only used for unit-testing
         internal ReportViewerParameters ViewerParameters
         {
@@ -143,6 +166,15 @@ namespace MvcReportViewer
                 if (_viewerParameters.LocalReportDataSources != null)
                 {
                     foreach(var dataSource in _viewerParameters.LocalReportDataSources)
+                    {
+                        var reportDataSource = new ReportDataSource(dataSource.Key, dataSource.Value);
+                        localReport.DataSources.Add(reportDataSource);
+                    }
+                }
+                    
+                if (_viewerParameters.LocalReportEnumerableDataSources != null)
+                {
+                    foreach (var dataSource in _viewerParameters.LocalReportEnumerableDataSources)
                     {
                         var reportDataSource = new ReportDataSource(dataSource.Key, dataSource.Value);
                         localReport.DataSources.Add(reportDataSource);
@@ -199,7 +231,8 @@ namespace MvcReportViewer
                 throw new MvcReportViewerException("Report Server is not specified.");
             }
 
-            if (string.IsNullOrEmpty(_viewerParameters.ReportPath))
+            if (string.IsNullOrEmpty(_viewerParameters.ReportEmbeddedResource) 
+                && string.IsNullOrEmpty(_viewerParameters.ReportPath))
             {
                 throw new MvcReportViewerException("Report is not specified.");
             }

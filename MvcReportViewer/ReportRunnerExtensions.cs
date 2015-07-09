@@ -2,6 +2,7 @@
 using System.Data;
 using System.Web.Mvc;
 using Microsoft.Reporting.WebForms;
+using System.Collections;
 
 namespace MvcReportViewer
 {
@@ -151,6 +152,26 @@ namespace MvcReportViewer
                 username,
                 password,
                 reportParameters,
+                mode,
+                localReportDataSources);
+
+            return reportRunner.Run();
+        }
+
+        public static FileStreamResult EmbeddedReport(
+            this Controller controller,
+            ReportFormat reportFormat,
+            string reportAssembly,
+            string reportEmbededName,
+            object reportParameters,
+            ProcessingMode mode = ProcessingMode.Remote,
+            IDictionary<string, IEnumerable> localReportDataSources = null)
+        {
+            var reportRunner = new ReportRunner(
+                reportFormat,
+                reportAssembly,
+                reportEmbededName,
+                HtmlHelper.AnonymousObjectToHtmlAttributes(reportParameters),
                 mode,
                 localReportDataSources);
 

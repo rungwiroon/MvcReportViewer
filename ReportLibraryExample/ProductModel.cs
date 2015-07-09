@@ -20,6 +20,6 @@ namespace ReportLibrary.Example
 
         public float Weight { get; set; }
 
-        public string Note { get; set; }
+        public string Description { get; set; }
     }
 }

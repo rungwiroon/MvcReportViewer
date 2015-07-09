@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.Reporting.WebForms;
 using System.Web.UI.WebControls;
+using System.Reflection;
+using System.IO;
 
 namespace MvcReportViewer
 {
@@ -24,7 +26,24 @@ namespace MvcReportViewer
         {
             reportViewer.ProcessingMode = ProcessingMode.Local;
             var localReport = reportViewer.LocalReport;
-            localReport.ReportPath = parameters.ReportPath;
+
+
+            if (!string.IsNullOrEmpty(parameters.ReportAssembly))
+            {
+                Assembly assembly = Assembly.Load(parameters.ReportAssembly);
+                Stream stream = assembly.GetManifestResourceStream(parameters.ReportEmbeddedResource);
+                localReport.LoadReportDefinition(stream);
+            }
+
+            else if(!string.IsNullOrEmpty(parameters.ReportEmbeddedResource))
+            {
+                localReport.ReportEmbeddedResource = parameters.ReportEmbeddedResource;
+            }
+            
+            else
+            {
+                localReport.ReportPath = parameters.ReportPath;
+            }
 
             if(parameters.ControlSettings != null &&  parameters.ControlSettings.EnableExternalImages != null && parameters.ControlSettings.EnableExternalImages.Value)
                 localReport.EnableExternalImages = true;

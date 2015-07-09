@@ -179,6 +179,10 @@
       <Project>{bf8d2b0b-efd0-44a6-b6e1-a3215b4c477b}</Project>
       <Name>MvcReportViewer_NET45</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ReportLibraryExample\ReportLibraryExample.csproj">
+      <Project>{83305855-9844-434a-810b-c9d7393cb291}</Project>
+      <Name>ReportLibraryExample</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

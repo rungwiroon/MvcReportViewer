@@ -6,6 +6,8 @@ using MvcReportViewer.Example.Models;
 using System.Configuration;
 using System.Data.SqlClient;
 using Microsoft.Reporting.WebForms;
+using System.Collections;
+using ReportLibrary.Example;
 
 namespace MvcReportViewer.Example.Controllers
 {
@@ -14,7 +16,9 @@ namespace MvcReportViewer.Example.Controllers
         private const string RemoteReportName = "/TestReports/TestReport";
         private const string LocalReportName = "App_Data/Reports/Products.rdlc";
         private const string LocalNoDataReportName = "App_Data/Reports/NoDataReport.rdlc";
-        private const string LocalEmbededReportName = "";
+
+        private const string LocalReportAssembly = "ReportLibraryExample";
+        private const string LocalEmbeddedReportName = "ReportLibrary.Example.ProductReport.rdlc";
 
         public ActionResult Index()
         {
@@ -119,6 +123,20 @@ namespace MvcReportViewer.Example.Controllers
             return View(model);
         }
 
+        public ActionResult LocalEmbeddedReports()
+        {
+            return this.EmbeddedReport(
+                    ReportFormat.Excel,
+                    LocalReportAssembly,
+                    LocalEmbeddedReportName,
+                    new { Parameter1 = "Test", Parameter2 = 123 },
+                    ProcessingMode.Local,
+                    new Dictionary<string, IEnumerable>
+                    {
+                        { "Products", GetProducts2() }
+                    });
+        }
+
         #region Helper Methods for SessionLocalDataSourceProvider examples
 
         private DataTable GetProducts()
@@ -147,6 +165,34 @@ namespace MvcReportViewer.Example.Controllers
                     }
                 }
             }
+        }
+
+        private IEnumerable GetProducts2()
+        {
+            return new ProductModel[] 
+            {
+                new ProductModel()
+                {
+                    Id = 1,
+                    Name = "aaa",
+                    Width = 1,
+                    Length = 2,
+                    Height = 3,
+                    Weight = 4,
+                    Description = "description"
+                },
+
+                new ProductModel()
+                {
+                    Id = 2,
+                    Name = "bbb",
+                    Width = 1,
+                    Length = 2,
+                    Height = 3,
+                    Weight = 4,
+                    Description = "description"
+                },
+            };
         }
 
         #endregion

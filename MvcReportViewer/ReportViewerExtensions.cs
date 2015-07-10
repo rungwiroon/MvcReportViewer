@@ -27,7 +27,6 @@ namespace MvcReportViewer
             reportViewer.ProcessingMode = ProcessingMode.Local;
             var localReport = reportViewer.LocalReport;
 
-
             if (!string.IsNullOrEmpty(parameters.ReportAssembly))
             {
                 Assembly assembly = Assembly.Load(parameters.ReportAssembly);

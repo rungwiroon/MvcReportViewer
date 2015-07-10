@@ -143,6 +143,9 @@ namespace MvcReportViewer
         {
             Validate();
 
+            ViewerParameters.ControlSettings = new ControlSettings();
+            ViewerParameters.ControlSettings.EnableExternalImages = true;
+
             var reportViewer = new ReportViewer();
             reportViewer.Initialize(_viewerParameters);
 
@@ -163,6 +166,8 @@ namespace MvcReportViewer
             else
             {
                 var localReport = reportViewer.LocalReport;
+                //localReport.EnableExternalImages = true;
+                
                 if (_viewerParameters.LocalReportDataSources != null)
                 {
                     foreach(var dataSource in _viewerParameters.LocalReportDataSources)
@@ -226,7 +231,7 @@ namespace MvcReportViewer
 
         private void Validate()
         {
-            if (string.IsNullOrEmpty(_viewerParameters.ReportServerUrl))
+            if (_viewerParameters.ProcessingMode == ProcessingMode.Remote && string.IsNullOrEmpty(_viewerParameters.ReportServerUrl))
             {
                 throw new MvcReportViewerException("Report Server is not specified.");
             }

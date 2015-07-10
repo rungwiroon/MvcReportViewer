@@ -126,15 +126,15 @@ namespace MvcReportViewer.Example.Controllers
         public ActionResult LocalEmbeddedReports()
         {
             return this.EmbeddedReport(
-                    ReportFormat.Excel,
-                    LocalReportAssembly,
-                    LocalEmbeddedReportName,
-                    new { Parameter1 = "Test", Parameter2 = 123 },
-                    ProcessingMode.Local,
-                    new Dictionary<string, IEnumerable>
-                    {
-                        { "Products", GetProducts2() }
-                    });
+                ReportFormat.Excel,
+                LocalReportAssembly,
+                LocalEmbeddedReportName,
+                new { Parameter1 = "Test", Parameter2 = 123 },
+                ProcessingMode.Local,
+                new Dictionary<string, IEnumerable>
+                {
+                    { "Products", GetProducts2() }
+                });
         }
 
         #region Helper Methods for SessionLocalDataSourceProvider examples

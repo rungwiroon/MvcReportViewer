@@ -30,6 +30,14 @@ namespace MvcReportViewer
                 {
                     parameters.ReportPath = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
                 }
+                else if (key.EqualsIgnoreCase(UriParameters.ReportAssemblyName))
+                {
+                    parameters.ReportAssembly = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
+                }
+                else if (key.EqualsIgnoreCase(UriParameters.ReportEmbeddedName))
+                {
+                    parameters.ReportEmbeddedResource = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
+                }
                 else if (key.EqualsIgnoreCase(UriParameters.ControlId))
                 {
                     var parameter = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
@@ -86,7 +94,7 @@ namespace MvcReportViewer
                 throw new MvcReportViewerException("Report Server is not specified.");
             }
 
-            if (string.IsNullOrEmpty(parameters.ReportPath))
+            if (string.IsNullOrEmpty(parameters.ReportEmbeddedResource) && string.IsNullOrEmpty(parameters.ReportPath))
             {
                 throw new MvcReportViewerException("Report is not specified.");
             }

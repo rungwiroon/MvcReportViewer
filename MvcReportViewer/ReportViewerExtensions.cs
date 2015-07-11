@@ -77,7 +77,9 @@ namespace MvcReportViewer
             reportViewer.ProcessingMode = ProcessingMode.Remote;
             var serverReport = reportViewer.ServerReport;
             serverReport.ReportServerUrl = new Uri(parameters.ReportServerUrl);
-            serverReport.ReportPath = parameters.ReportPath;
+
+            serverReport.ReportPath = parameters.ReportPath;          
+            
             if (!string.IsNullOrEmpty(parameters.Username))
             {
                 if (parameters.IsAzureSSRS)

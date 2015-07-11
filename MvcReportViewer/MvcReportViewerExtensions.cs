@@ -115,6 +115,21 @@ namespace MvcReportViewer
         }
 
         /// <summary>
+        /// Returns fluent interface to HTML <b>iframe</b> rendering ASP.NET ReportViewer control.
+        /// </summary>
+        /// <param name="helper">The HTML helper instance that this method extends.</param>
+        /// <param name="reportAssemblyName">The assembly name that store rdlc files.</param>
+        /// <param name="reportEmbeddedName">The path to the embedded report in assembly.</param>
+        /// <returns>Fluent interface HTML <b>iframe</b> element.</returns>
+        public static IMvcReportViewerOptions MvcReportViewerFluent(
+            this HtmlHelper helper,
+            string reportAssemblyName,
+            string reportEmbeddedName)
+        {
+            return new MvcReportViewerIframe(reportAssemblyName, reportEmbeddedName);
+        }
+
+        /// <summary>
         /// Returns fluent interface to HTML <b>iframe</b> rendering ASP.NET ReportViewer control. 
         /// IMPORTANT: Unit-tests only!
         /// </summary>

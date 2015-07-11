@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 using Microsoft.Reporting.WebForms;
+using System.Collections;
 
 namespace MvcReportViewer
 {
@@ -27,6 +28,10 @@ if (formElement{0}) {{
         private readonly ControlSettingsManager _settingsManager = new ControlSettingsManager();
 
         private string _reportPath;
+
+        private string _reportAssemblyName;
+
+        private string _reportEmbeddedName;
 
         private string _reportServerUrl;
 
@@ -54,6 +59,16 @@ if (formElement{0}) {{
         /// <param name="reportPath">The path to the report on the server.</param>
         public MvcReportViewerIframe(string reportPath)
             : this(reportPath, null, null, null, null, null, null, FormMethod.Get)
+        {
+        }
+
+        /// <summary>
+        /// Creates an instance of MvcReportViewerIframe class.
+        /// </summary>
+        /// <param name="reportAssemblyName">The path to the report on the server.</param>
+        /// <param name="reportEmbeddedName">The path to the report on the server.</param>
+        public MvcReportViewerIframe(string reportAssemblyName, string reportEmbeddedName)
+            : this(reportAssemblyName, reportEmbeddedName, null, null, null, FormMethod.Get)
         {
         }
 
@@ -127,6 +142,61 @@ if (formElement{0}) {{
                    htmlAttributes, 
                    method)
         {
+        }
+
+        /// <summary>
+        /// Creates an instance of MvcReportViewerIframe class.
+        /// </summary>
+        /// <param name="reportPath">The path to the report on the server.</param>
+        /// <param name="reportServerUrl">The URL for the report server.</param>
+        /// <param name="username">The report server username.</param>
+        /// <param name="password">The report server password.</param>
+        /// <param name="reportParameters">The report parameter properties for the report.</param>
+        /// <param name="controlSettings">The Report Viewer control's UI settings.</param>
+        /// <param name="htmlAttributes">An object that contains the HTML attributes to set for the element.</param>
+        /// <param name="method">Method for sending parameters to the iframe, either GET or POST.</param>
+        public MvcReportViewerIframe(
+            string reportAssemblyName,
+            string reportEmbeddedName,
+            IDictionary<string, object> reportParameters,
+            ControlSettings controlSettings,
+            IDictionary<string, object> htmlAttributes,
+            FormMethod method)
+        {
+            var javaScriptApi = ConfigurationManager.AppSettings[WebConfigSettings.JavaScriptApi];
+            if (string.IsNullOrEmpty(javaScriptApi))
+            {
+                throw new MvcReportViewerException("MvcReportViewer.js location is not found. Make sure you have MvcReportViewer.AspxViewerJavaScript in your Web.config.");
+            }
+
+            _reportAssemblyName = reportAssemblyName;
+            _reportEmbeddedName = reportEmbeddedName;
+
+            _processingMode = Microsoft.Reporting.WebForms.ProcessingMode.Local;
+
+            _controlSettings = controlSettings;
+            _reportParameters = reportParameters != null ? reportParameters.ToList() : null;
+            _htmlAttributes = htmlAttributes;
+            _method = method;
+            _aspxViewer = ConfigurationManager.AppSettings[WebConfigSettings.AspxViewer];
+            if (string.IsNullOrEmpty(_aspxViewer))
+            {
+                throw new MvcReportViewerException("ASP.NET Web Forms viewer is not set. Make sure you have MvcReportViewer.AspxViewer in your Web.config.");
+            }
+
+            _aspxViewer = _aspxViewer.Trim();
+            if (_aspxViewer.StartsWith("~"))
+            {
+                _aspxViewer = VirtualPathUtility.ToAbsolute(_aspxViewer);
+            }
+
+            var encryptParametesConfig = ConfigurationManager.AppSettings[WebConfigSettings.EncryptParameters];
+            if (!bool.TryParse(encryptParametesConfig, out _encryptParameters))
+            {
+                _encryptParameters = false;
+            }
+
+            ControlId = Guid.NewGuid();
         }
 
         /// <summary>
@@ -272,6 +342,16 @@ if (formElement{0}) {{
                 html.Append(CreateHiddenField(UriParameters.ReportPath, _reportPath));
             }
 
+            if(!string.IsNullOrEmpty(_reportAssemblyName))
+            {
+                html.Append(CreateHiddenField(UriParameters.ReportAssemblyName, _reportAssemblyName));
+            }
+
+            if(!string.IsNullOrEmpty(_reportEmbeddedName))
+            {
+                html.Append(CreateHiddenField(UriParameters.ReportEmbeddedName, _reportEmbeddedName));
+            }
+
             if (!string.IsNullOrEmpty(_reportServerUrl))
             {
                 html.Append(CreateHiddenField(UriParameters.ReportServerUrl, _reportServerUrl));
@@ -340,6 +420,16 @@ if (formElement{0}) {{
             if (!string.IsNullOrEmpty(_reportPath))
             {
                 query[UriParameters.ReportPath] = _reportPath;
+            }
+
+            if (!string.IsNullOrEmpty(_reportAssemblyName))
+            {
+                query[UriParameters.ReportAssemblyName] = _reportAssemblyName;
+            }
+
+            if (!string.IsNullOrEmpty(_reportEmbeddedName))
+            {
+                query[UriParameters.ReportEmbeddedName] = _reportEmbeddedName;
             }
 
             if (!string.IsNullOrEmpty(_reportServerUrl))
@@ -546,6 +636,21 @@ if (formElement{0}) {{
         {
             var provider = LocalReportDataSourceProviderFactory.Current.Create();
             var dataSource = new ReportDataSource(dataSourceName, dataTable);
+            provider.Add(ControlId, dataSource);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Registers local data source.
+        /// </summary>
+        /// <param name="dataSourceName">Report data source name.</param>
+        /// <param name="enumerable">The data.</param>
+        /// <returns></returns>
+        public IMvcReportViewerOptions LocalDataSource2(string dataSourceName, IEnumerable enumerable)
+        {
+            var provider = LocalReportDataSourceProviderFactory.Current.Create();
+            var dataSource = new ReportDataSource(dataSourceName, enumerable);
             provider.Add(ControlId, dataSource);
 
             return this;

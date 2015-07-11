@@ -1,6 +1,11 @@
 ﻿@using System.Drawing
 @using System.Web.UI.WebControls
+@using Microsoft.Reporting.WebForms;
 @using MvcReportViewer;
+@using MvcReportViewer.Example.Models;
+
+@model EmbeddedReportModel
+
 @{
     ViewBag.Title = "MvcReportViewer Fluent Example";
 }
@@ -18,7 +23,7 @@
                 AsyncRendering = false
             };
     }
-    @@Html.MvcReportViewerFluent("/TestReports/TestReport").ReportParameters(new { Parameter1 = "Hello World!", Parameter2 = DateTime.Now, Parameter3 = 12345 }).Attributes(new { Height = 900, Width = 900, style = "border: none" }).ControlSettings(settings)
+    @@Html.MvcReportViewerFluent("ReportLibraryExample", "ReportLibrary.Example.ProductReport.rdlc").ProcessingMode(ProcessingMode.Local).ReportParameters(new { Parameter1 = "Test", Parameter2 = 123 }).LocalDataSource2("Products", Model.Products).Attributes(new { Height = 900, Width = 900, style = "border: none" }).ControlSettings(settings)
 }
 
 @{
@@ -31,7 +36,7 @@
             Width = new Unit("100%"),
             Height = new Unit("800px"),
             AsyncRendering = false
-        };    
+        };
 }
 
-@Html.MvcReportViewerFluent("/TestReports/TestReport").ReportParameters(new { Parameter1 = "Hello World!", Parameter2 = DateTime.Now, Parameter3 = 12345 }).Attributes(new { Height = 900, Width = 900, style = "border: none" }).ControlSettings(settings)
+@Html.MvcReportViewerFluent("ReportLibraryExample", "ReportLibrary.Example.ProductReport.rdlc").ProcessingMode(ProcessingMode.Local).ReportParameters(new { Parameter1 = "Test", Parameter2 = 123 }).LocalDataSource2("Products", Model.Products).Attributes(new { Height = 900, Width = 900, style = "border: none" }).ControlSettings(settings)

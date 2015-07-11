@@ -3,6 +3,7 @@ using System.Data;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.Reporting.WebForms;
+using System.Collections;
 
 namespace MvcReportViewer
 {
@@ -93,6 +94,8 @@ namespace MvcReportViewer
         /// <param name="dataTable">The data.</param>
         /// <returns></returns>
         IMvcReportViewerOptions LocalDataSource(string dataSourceName, DataTable dataTable);
+
+        IMvcReportViewerOptions LocalDataSource2(string dataSourceName, IEnumerable dataTable);
 
         /// <summary>
         /// Registers custom local data source, e.g. SQL query

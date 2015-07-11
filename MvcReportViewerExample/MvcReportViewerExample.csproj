@@ -145,6 +145,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Models\EmbeddedReportModel.cs" />
     <Compile Include="Models\SqlLocalReportsModel.cs" />
     <Compile Include="Models\LocalReportsModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -227,6 +228,7 @@
     </Content>
     <Content Include="Views\Home\LocalReports.cshtml" />
     <Content Include="Views\Home\NoDataLocalReport.cshtml" />
+    <Content Include="Views\Home\FluentEmbedded.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

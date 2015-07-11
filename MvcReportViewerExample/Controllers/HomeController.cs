@@ -123,6 +123,16 @@ namespace MvcReportViewer.Example.Controllers
             return View(model);
         }
 
+        public ActionResult FluentEmbedded()
+        {
+            var model = new EmbeddedReportModel() 
+            {
+                Products = GetProducts2()
+            };
+            
+            return View(model);
+        }
+
         public ActionResult LocalEmbeddedReports()
         {
             return this.EmbeddedReport(
@@ -167,7 +177,7 @@ namespace MvcReportViewer.Example.Controllers
             }
         }
 
-        private IEnumerable GetProducts2()
+        private IEnumerable<ProductModel> GetProducts2()
         {
             return new ProductModel[] 
             {

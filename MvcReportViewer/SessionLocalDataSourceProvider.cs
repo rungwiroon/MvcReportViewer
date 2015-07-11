@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.SessionState;
 using Microsoft.Reporting.WebForms;
+using System.Collections;
 
 namespace MvcReportViewer
 {
@@ -28,12 +29,25 @@ namespace MvcReportViewer
             var dataSources = _session[key] as List<ReportDataSourceWrapper>;
             dataSources = dataSources ?? new List<ReportDataSourceWrapper>();
 
-            dataSources.Add(
+            if(dataSource.Value is DataTable)
+            {
+                dataSources.Add(
                 new ReportDataSourceWrapper
                 {
                     Name = dataSource.Name,
                     Value = (DataTable)dataSource.Value
                 });
+            }
+            
+            else if(dataSource.Value is IEnumerable)
+            {
+                dataSources.Add(
+                new ReportDataSourceWrapper2
+                {
+                    Name = dataSource.Name,
+                    Value = (IEnumerable)dataSource.Value
+                });
+            }
 
             _session[key] = dataSources;
         }
@@ -42,9 +56,17 @@ namespace MvcReportViewer
         {
             var key = GetSessionValueKey(reportControlId);
             var dataSources = _session[key] as List<ReportDataSourceWrapper>;
-            return dataSources == null
-                ? new List<ReportDataSource>()
-                : dataSources.Select(s => new ReportDataSource(s.Name, s.Value));
+            var dataSourceList = new List<ReportDataSource>();
+
+            foreach(var dataSource in dataSources)
+            {
+                if(dataSource is ReportDataSourceWrapper2)
+                    dataSourceList.Add(new ReportDataSource(dataSource.Name, ((ReportDataSourceWrapper2)dataSource).Value));
+                else
+                    dataSourceList.Add(new ReportDataSource(dataSource.Name, dataSource.Value));
+            }
+
+            return dataSourceList;
         }
 
         [Serializable]
@@ -53,6 +75,12 @@ namespace MvcReportViewer
             public string Name { get; set; }
 
             public DataTable Value { get; set; }
+        }
+
+        [Serializable]
+        private class ReportDataSourceWrapper2 : ReportDataSourceWrapper
+        {
+            public new IEnumerable Value { get; set; }
         }
     }
 }

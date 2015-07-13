@@ -33,14 +33,15 @@ namespace MvcReportViewer
                 Stream stream = assembly.GetManifestResourceStream(parameters.ReportEmbeddedResource);
                 localReport.LoadReportDefinition(stream);
 
-                foreach(var subReport in parameters.SubReportDataSources)
-                {
-                    var reportName = subReport.Key;
-                    var reportResourceName = subReport.Value.ResourceName;
+                if(parameters.SubReportDataSources != null)
+                    foreach(var subReport in parameters.SubReportDataSources)
+                    {
+                        var reportName = subReport.Key;
+                        var reportResourceName = subReport.Value.ResourceName;
 
-                    Stream subReportStream = assembly.GetManifestResourceStream(reportResourceName);
-                    localReport.LoadSubreportDefinition(reportName, subReportStream);
-                }
+                        Stream subReportStream = assembly.GetManifestResourceStream(reportResourceName);
+                        localReport.LoadSubreportDefinition(reportName, subReportStream);
+                    }
             }
 
             else if(!string.IsNullOrEmpty(parameters.ReportEmbeddedResource))

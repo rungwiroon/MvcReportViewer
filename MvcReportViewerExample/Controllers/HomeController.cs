@@ -19,7 +19,7 @@ namespace MvcReportViewer.Example.Controllers
         private const string LocalNoDataReportName = "App_Data/Reports/NoDataReport.rdlc";
 
         //private const string LocalReportAssembly = "ReportLibraryExample";
-        private const string LocalEmbeddedReportName = "ReportLibrary.Example.ProductReport.rdlc";
+        private const string LocalEmbeddedReportName = "ReportLibrary.Example.ReportFiles.ProductReport.rdlc";
 
         public ActionResult Index()
         {

@@ -40,16 +40,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ProductModel.cs" />
+    <Compile Include="Models\ProductDetailModel.cs" />
+    <Compile Include="Models\ProductModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ProductReport.rdlc">
+    <EmbeddedResource Include="ReportFiles\ProductDetailReport.rdlc" />
+    <EmbeddedResource Include="ReportFiles\ProductReport.rdlc">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="ReportFiles\ProductWithDetail.rdlc" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="Properties\DataSources\ProductDetailModel.datasource" />
     <None Include="Properties\DataSources\ProductModel.datasource" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

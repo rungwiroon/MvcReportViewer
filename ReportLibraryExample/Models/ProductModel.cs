@@ -12,14 +12,8 @@ namespace ReportLibrary.Example
 
         public string Name { get; set; }
 
-        public float Width { get; set; }
-
-        public float Length { get; set; }
-
-        public float Height { get; set; }
-
-        public float Weight { get; set; }
-
+        public string ProductTypeName { get; set; }
+        
         public string Description { get; set; }
     }
 }

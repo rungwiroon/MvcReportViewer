@@ -90,6 +90,9 @@
     <Compile Include="..\MvcReportViewer\ControlSettingsManager.cs">
       <Link>ControlSettingsManager.cs</Link>
     </Compile>
+    <Compile Include="..\MvcReportViewer\GenericDataSource.cs">
+      <Link>GenericDataSource.cs</Link>
+    </Compile>
     <Compile Include="..\MvcReportViewer\IgnoreCaseExtensions.cs">
       <Link>IgnoreCaseExtensions.cs</Link>
     </Compile>
@@ -147,6 +150,9 @@
     </Compile>
     <Compile Include="..\MvcReportViewer\SqlLocalDataSourceProvider.cs">
       <Link>SqlLocalDataSourceProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\MvcReportViewer\SubReportDataSource.cs">
+      <Link>SubReportDataSource.cs</Link>
     </Compile>
     <Compile Include="..\MvcReportViewer\UriParameterAttribute.cs">
       <Link>UriParameterAttribute.cs</Link>

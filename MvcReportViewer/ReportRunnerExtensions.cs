@@ -22,9 +22,10 @@ namespace MvcReportViewer
             ReportFormat reportFormat, 
             string reportPath,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, DataTable> localReportDataSources = null)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
         {
-            var reportRunner = new ReportRunner(reportFormat, reportPath, mode, localReportDataSources);
+            var reportRunner = new ReportRunner(reportFormat, reportPath, mode, localReportDataSources, subReportDataSources);
             return reportRunner.Run();
         }
 
@@ -44,14 +45,16 @@ namespace MvcReportViewer
             string reportPath,
             object reportParameters,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, DataTable> localReportDataSources = null)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
         {
             var reportRunner = new ReportRunner(
                 reportFormat, 
                 reportPath, 
                 HtmlHelper.AnonymousObjectToHtmlAttributes(reportParameters),
                 mode,
-                localReportDataSources);
+                localReportDataSources,
+                subReportDataSources);
 
             return reportRunner.Run();
         }
@@ -72,14 +75,16 @@ namespace MvcReportViewer
             string reportPath,
             IEnumerable<KeyValuePair<string, object>> reportParameters,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, DataTable> localReportDataSources = null)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
         {
             var reportRunner = new ReportRunner(
                 reportFormat,
                 reportPath,
                 reportParameters,
                 mode,
-                localReportDataSources);
+                localReportDataSources,
+                subReportDataSources);
 
             return reportRunner.Run();
         }
@@ -106,7 +111,8 @@ namespace MvcReportViewer
             string password = null,
             object reportParameters = null,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, DataTable> localReportDataSources = null)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
         {
             var reportRunner = new ReportRunner(
                 reportFormat,
@@ -116,7 +122,8 @@ namespace MvcReportViewer
                 password,
                 HtmlHelper.AnonymousObjectToHtmlAttributes(reportParameters),
                 mode,
-                localReportDataSources);
+                localReportDataSources,
+                subReportDataSources);
 
             return reportRunner.Run();
         }
@@ -143,7 +150,8 @@ namespace MvcReportViewer
             string username = null,
             string password = null,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, DataTable> localReportDataSources = null)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
         {
             var reportRunner = new ReportRunner(
                 reportFormat,
@@ -153,27 +161,30 @@ namespace MvcReportViewer
                 password,
                 reportParameters,
                 mode,
-                localReportDataSources);
+                localReportDataSources,
+                subReportDataSources);
 
             return reportRunner.Run();
         }
 
-        public static FileStreamResult EmbeddedReport(
+        public static FileStreamResult Report(
             this Controller controller,
             ReportFormat reportFormat,
-            string reportAssembly,
-            string reportEmbededName,
+            string reportAssemblyName,
+            string reportEmbeddedName,
             object reportParameters,
-            ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, IEnumerable> localReportDataSources = null)
+            ProcessingMode mode = ProcessingMode.Local,
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
         {
             var reportRunner = new ReportRunner(
                 reportFormat,
-                reportAssembly,
-                reportEmbededName,
+                reportAssemblyName,
+                reportEmbeddedName,
                 HtmlHelper.AnonymousObjectToHtmlAttributes(reportParameters),
                 mode,
-                localReportDataSources);
+                localReportDataSources,
+                subReportDataSources);
 
             return reportRunner.Run();
         }

@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using Microsoft.Reporting.WebForms;
 using System.Collections;
 using ReportLibrary.Example;
+using System.Linq;
 
 namespace MvcReportViewer.Example.Controllers
 {
@@ -17,7 +18,7 @@ namespace MvcReportViewer.Example.Controllers
         private const string LocalReportName = "App_Data/Reports/Products.rdlc";
         private const string LocalNoDataReportName = "App_Data/Reports/NoDataReport.rdlc";
 
-        private const string LocalReportAssembly = "ReportLibraryExample";
+        //private const string LocalReportAssembly = "ReportLibraryExample";
         private const string LocalEmbeddedReportName = "ReportLibrary.Example.ProductReport.rdlc";
 
         public ActionResult Index()
@@ -83,10 +84,10 @@ namespace MvcReportViewer.Example.Controllers
                     LocalReportName,
                     new { Parameter1 = "Test", Parameter2 = 123 },
                     ProcessingMode.Local,
-                    new Dictionary<string, DataTable>
+                    new Dictionary<string, IGenericDataSource>
                     {
-                        { "Products", GetProducts() },
-                        { "Cities", GetCities() }
+                        { "Products", new DataTableDataSource(GetProducts()) },
+                        { "Cities", new DataTableDataSource(GetCities()) }
                     });
             }
 
@@ -135,15 +136,41 @@ namespace MvcReportViewer.Example.Controllers
 
         public ActionResult LocalEmbeddedReports()
         {
-            return this.EmbeddedReport(
+            return this.Report(
                 ReportFormat.Excel,
-                LocalReportAssembly,
-                LocalEmbeddedReportName,
+                "ReportLibraryExample",
+                "ReportLibrary.Example.ReportFiles.ProductReport.rdlc",
                 new { Parameter1 = "Test", Parameter2 = 123 },
                 ProcessingMode.Local,
-                new Dictionary<string, IEnumerable>
+                new Dictionary<string, IGenericDataSource>
                 {
-                    { "Products", GetProducts2() }
+                    { "Products", new EnumerableDataSource(GetProducts2()) }
+                });
+        }
+
+        public ActionResult LocalReportWithSubReport()
+        {
+            return this.Report(
+                ReportFormat.Excel,
+                "ReportLibraryExample",
+                "ReportLibrary.Example.ReportFiles.ProductWithDetail.rdlc",
+                new { Parameter1 = "Test", Parameter2 = 123 },
+                ProcessingMode.Local,
+                new Dictionary<string, IGenericDataSource>
+                {
+                    { "Products", new EnumerableDataSource(GetProducts2()) }
+                },
+                
+                new Dictionary<string, ISubReportDataSource>
+                {
+                    {
+                        "ProductDetailReport",
+                        new SubReportEnumerableDataSource<ProductDetailModel>(
+                            "ReportLibrary.Example.ReportFiles.ProductDetailReport.rdlc",
+                            "ProductDetails", 
+                            new GenericEnumerableDataSource<ProductDetailModel>(GetProductDetails()), 
+                            (parameters, data) => data.Where(pd => pd.ProductId == int.Parse((parameters["ProductId"].Values[0])))) 
+                    }
                 });
         }
 
@@ -185,23 +212,56 @@ namespace MvcReportViewer.Example.Controllers
                 {
                     Id = 1,
                     Name = "aaa",
-                    Width = 1,
-                    Length = 2,
-                    Height = 3,
-                    Weight = 4,
-                    Description = "description"
+                    ProductTypeName = "111",
+                    Description = "description1"
                 },
 
                 new ProductModel()
                 {
                     Id = 2,
                     Name = "bbb",
+                    ProductTypeName = "222",
+                    Description = "description2"
+                },
+            };
+        }
+
+        private IEnumerable<ProductDetailModel> GetProductDetails()
+        {
+            return new ProductDetailModel[]
+            {
+                new ProductDetailModel()
+                {
+                    Id = 1,
+                    ProductId = 1,
+                    Size = "S",
                     Width = 1,
                     Length = 2,
                     Height = 3,
                     Weight = 4,
-                    Description = "description"
                 },
+
+                new ProductDetailModel()
+                {
+                    Id = 2,
+                    ProductId = 1,
+                    Size = "M",
+                    Width = 5,
+                    Length = 6,
+                    Height = 7,
+                    Weight = 8,
+                },
+
+                new ProductDetailModel()
+                {
+                    Id = 3,
+                    ProductId = 2,
+                    Size = "L",
+                    Width = 6,
+                    Length = 7,
+                    Height = 8,
+                    Weight = 8,
+                }
             };
         }
 

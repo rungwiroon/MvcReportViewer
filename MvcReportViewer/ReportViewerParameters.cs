@@ -33,22 +33,12 @@ namespace MvcReportViewer
 
         public IDictionary<string, ReportParameter> ReportParameters { get; set; }
 
-        public IDictionary<string, DataTable> LocalReportDataSources { get; set; }
+        public IDictionary<string, IGenericDataSource> LocalReportDataSources { get; set; }
 
-        public IDictionary<string, IEnumerable> LocalReportEnumerableDataSources { get; set; }
+        public IDictionary<string, ISubReportDataSource> SubReportDataSources { get; set; }
 
         public bool IsReportRunnerExecution { get; set; }
 
         public ControlSettings ControlSettings { get; set; }
-    }
-
-    internal class ReportViewerParameters2<T> : ReportViewerParameters
-    {
-        public ReportViewerParameters2()
-        {
-            ReportParameters = new Dictionary<string, ReportParameter>();
-        }
-
-        public new IDictionary<string, T> LocalReportDataSources { get; set; }
     }
 }

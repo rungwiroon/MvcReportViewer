@@ -25,8 +25,17 @@ namespace MvcReportViewer
             ReportFormat reportFormat,
             string reportPath,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, DataTable> localReportDataSources = null)
-            : this(reportFormat, reportPath, null, null, null, null, mode, localReportDataSources)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
+            : this(reportFormat, 
+                reportPath, 
+                null, 
+                null, 
+                null, 
+                null, 
+                mode, 
+                localReportDataSources,
+                subReportDataSources)
         {
         }
 
@@ -35,13 +44,15 @@ namespace MvcReportViewer
             string reportPath,
             IDictionary<string, object> reportParameters,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, DataTable> localReportDataSources = null)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
             : this(
                 reportFormat, 
                 reportPath, 
                 reportParameters != null ? reportParameters.ToList() : null,
                 mode,
-                localReportDataSources)
+                localReportDataSources,
+                subReportDataSources)
         {
         }
 
@@ -50,8 +61,17 @@ namespace MvcReportViewer
             string reportPath,
             IEnumerable<KeyValuePair<string, object>> reportParameters,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, DataTable> localReportDataSources = null)
-            : this(reportFormat, reportPath, null, null, null, reportParameters, mode, localReportDataSources)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
+            : this(reportFormat,
+                reportPath, 
+                null, 
+                null, 
+                null, 
+                reportParameters, 
+                mode, 
+                localReportDataSources, 
+                subReportDataSources)
         {
         }
 
@@ -63,7 +83,8 @@ namespace MvcReportViewer
             string password,
             IDictionary<string, object> reportParameters,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, DataTable> localReportDataSources = null)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
             : this(
                 reportFormat, 
                 reportPath, 
@@ -72,7 +93,8 @@ namespace MvcReportViewer
                 password, 
                 reportParameters != null ? reportParameters.ToList() : null,
                 mode,
-                localReportDataSources)
+                localReportDataSources,
+                subReportDataSources)
         {
         }
 
@@ -84,7 +106,8 @@ namespace MvcReportViewer
             string password,
             IEnumerable<KeyValuePair<string, object>> reportParameters,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, DataTable> localReportDataSources = null)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
         {
             _reportFormat = reportFormat;
 
@@ -92,6 +115,7 @@ namespace MvcReportViewer
             if (mode == ProcessingMode.Local && localReportDataSources != null)
             {
                 _viewerParameters.LocalReportDataSources = localReportDataSources;
+                _viewerParameters.SubReportDataSources = subReportDataSources;
             }
 
             _viewerParameters.ReportPath = reportPath;
@@ -107,22 +131,24 @@ namespace MvcReportViewer
 
         public ReportRunner(
             ReportFormat reportFormat,
-            string reportAssembly,
-            string reportEmbededName,
+            string reportAssemblyName,
+            string reportEmbeddedName,
             IEnumerable<KeyValuePair<string, object>> reportParameters,
             ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, IEnumerable> localReportDataSources = null)
+            IDictionary<string, IGenericDataSource> localReportDataSources = null,
+            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
         {
             _reportFormat = reportFormat;
 
             _viewerParameters.ProcessingMode = mode;
             if (mode == ProcessingMode.Local && localReportDataSources != null)
             {
-                _viewerParameters.LocalReportEnumerableDataSources = localReportDataSources;
+                _viewerParameters.LocalReportDataSources = localReportDataSources;
+                _viewerParameters.SubReportDataSources = subReportDataSources;
             }
 
-            _viewerParameters.ReportAssembly = reportAssembly;
-            _viewerParameters.ReportEmbeddedResource = reportEmbededName;
+            _viewerParameters.ReportAssembly = reportAssemblyName;
+            _viewerParameters.ReportEmbeddedResource = reportEmbeddedName;
 
             ParseParameters(reportParameters);
         }
@@ -166,22 +192,15 @@ namespace MvcReportViewer
             else
             {
                 var localReport = reportViewer.LocalReport;
-                //localReport.EnableExternalImages = true;
+
+                localReport.SubreportProcessing += localReport_SubreportProcessing;
                 
                 if (_viewerParameters.LocalReportDataSources != null)
                 {
                     foreach(var dataSource in _viewerParameters.LocalReportDataSources)
                     {
-                        var reportDataSource = new ReportDataSource(dataSource.Key, dataSource.Value);
-                        localReport.DataSources.Add(reportDataSource);
-                    }
-                }
-                    
-                if (_viewerParameters.LocalReportEnumerableDataSources != null)
-                {
-                    foreach (var dataSource in _viewerParameters.LocalReportEnumerableDataSources)
-                    {
-                        var reportDataSource = new ReportDataSource(dataSource.Key, dataSource.Value);
+                        ReportDataSource reportDataSource = dataSource.Value.CreateDataSource(dataSource.Key);
+
                         localReport.DataSources.Add(reportDataSource);
                     }
                 }
@@ -204,6 +223,17 @@ namespace MvcReportViewer
             }
 
             return new FileStreamResult(output, mimeType);
+        }
+
+        void localReport_SubreportProcessing(object sender, SubreportProcessingEventArgs e)
+        {
+            var subReportDataSource = _viewerParameters.SubReportDataSources[e.ReportPath];
+            
+            var reportDataSource = subReportDataSource.CreateDataSource(e.Parameters);
+
+            e.DataSources.Add(reportDataSource);
+
+            //localReport.Refresh();
         }
 
         private void ParseParameters(IEnumerable<KeyValuePair<string, object>> reportParameters)

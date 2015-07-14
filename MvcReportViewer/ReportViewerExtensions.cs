@@ -27,32 +27,7 @@ namespace MvcReportViewer
             reportViewer.ProcessingMode = ProcessingMode.Local;
             var localReport = reportViewer.LocalReport;
 
-            if (!string.IsNullOrEmpty(parameters.ReportAssembly))
-            {
-                Assembly assembly = Assembly.Load(parameters.ReportAssembly);
-                Stream stream = assembly.GetManifestResourceStream(parameters.ReportEmbeddedResource);
-                localReport.LoadReportDefinition(stream);
-
-                if(parameters.SubReportDataSources != null)
-                    foreach(var subReport in parameters.SubReportDataSources)
-                    {
-                        var reportName = subReport.Key;
-                        var reportResourceName = subReport.Value.ResourceName;
-
-                        Stream subReportStream = assembly.GetManifestResourceStream(reportResourceName);
-                        localReport.LoadSubreportDefinition(reportName, subReportStream);
-                    }
-            }
-
-            else if(!string.IsNullOrEmpty(parameters.ReportEmbeddedResource))
-            {
-                localReport.ReportEmbeddedResource = parameters.ReportEmbeddedResource;
-            }
-            
-            else
-            {
-                localReport.ReportPath = parameters.ReportPath;
-            }
+            parameters.ReportLoader.LoadReport(reportViewer);
 
             if(parameters.ControlSettings != null &&  parameters.ControlSettings.EnableExternalImages != null && parameters.ControlSettings.EnableExternalImages.Value)
                 localReport.EnableExternalImages = true;
@@ -64,7 +39,7 @@ namespace MvcReportViewer
 
             // If parameters.LocalReportDataSources then we should get report data source
             // from local data source provider (ignore it for Report Runner)
-            if (parameters.LocalReportDataSources == null && !parameters.IsReportRunnerExecution)
+            if (parameters.ReportDataSources == null && !parameters.IsReportRunnerExecution)
             {
                 if (parameters.ControlId == null)
                 {

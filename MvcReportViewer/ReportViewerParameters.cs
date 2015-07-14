@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace MvcReportViewer
 {
-    internal class ReportViewerParameters
+    public class ReportViewerParameters
     {
         public ReportViewerParameters()
         {
@@ -21,9 +21,11 @@ namespace MvcReportViewer
 
         public string ReportPath { get; set; }
 
-        public string ReportAssembly { get; set; }
+        public string ReportAssemblyName { get; set; }
 
-        public string ReportEmbeddedResource { get; set; }
+        public string MainReportResourceName { get; set; }
+
+        public string SubReportResourceNames { get; set; }
 
         public Guid? ControlId { get; set; }
 
@@ -31,11 +33,13 @@ namespace MvcReportViewer
 
         public bool IsAzureSSRS { get; set; }
 
+        public IReportLoader ReportLoader { get; set; }
+
         public IDictionary<string, ReportParameter> ReportParameters { get; set; }
 
-        public IDictionary<string, IGenericDataSource> LocalReportDataSources { get; set; }
+        public IEnumerable<IDataSource> ReportDataSources { get; set; }
 
-        public IDictionary<string, ISubReportDataSource> SubReportDataSources { get; set; }
+        public IEnumerable<ISubReportDataSource> SubReportDataSources { get; set; }
 
         public bool IsReportRunnerExecution { get; set; }
 

@@ -7,36 +7,34 @@ using System.Text;
 
 namespace MvcReportViewer
 {
-    public interface ISubReportDataSource
+    public interface ISubReportDataSource 
     {
         ReportDataSource CreateDataSource(ReportParameterInfoCollection reportParameters);
 
-        string ResourceName { get; }
+        string ReportPath { get; }
     }
 
     public class SubReportEnumerableDataSource<T> : ISubReportDataSource
     {
-        private string _dataSourceName;
         private GenericEnumerableDataSource<T> _genericDataSource;
         private Func<ReportParameterInfoCollection, IEnumerable<T>, IEnumerable<T>> _dataSourceFunc;
 
-        public string ResourceName { get; private set; }
+        public string ReportPath { get; private set; }
 
-        public SubReportEnumerableDataSource(string resourceName,
-            string dataSourceName,
+        public SubReportEnumerableDataSource(string reportPath,
             GenericEnumerableDataSource<T> dataSource,
             Func<ReportParameterInfoCollection,  IEnumerable<T>,  IEnumerable<T>> dataSourceFunc)
         {
-            ResourceName = resourceName;
+            ReportPath = reportPath;
 
-            _dataSourceName = dataSourceName;
             _genericDataSource = dataSource;
             _dataSourceFunc = dataSourceFunc;
         }
 
         public ReportDataSource CreateDataSource(ReportParameterInfoCollection reportParameters)
         {
-            return new ReportDataSource(_dataSourceName, _dataSourceFunc.Invoke(reportParameters, _genericDataSource.Data));
+            return new ReportDataSource(_genericDataSource.DataSourceName,
+                _dataSourceFunc.Invoke(reportParameters, _genericDataSource.Data));
         }
     }
 }

@@ -23,15 +23,12 @@ namespace MvcReportViewer
 
         public ReportRunner(
             ReportFormat reportFormat,
-            string reportPath,
-            ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, IGenericDataSource> localReportDataSources = null,
-            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
+            IReportLoader reportLoader,
+            ProcessingMode mode,
+            IEnumerable<IDataSource> localReportDataSources = null,
+            IEnumerable<ISubReportDataSource> subReportDataSources = null)
             : this(reportFormat, 
-                reportPath, 
-                null, 
-                null, 
-                null, 
+                reportLoader,
                 null, 
                 mode, 
                 localReportDataSources,
@@ -41,14 +38,13 @@ namespace MvcReportViewer
 
         public ReportRunner(
             ReportFormat reportFormat,
-            string reportPath,
+            IReportLoader reportLoader,
             IDictionary<string, object> reportParameters,
-            ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, IGenericDataSource> localReportDataSources = null,
-            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
-            : this(
-                reportFormat, 
-                reportPath, 
+            ProcessingMode mode,
+            IEnumerable<IDataSource> localReportDataSources = null,
+            IEnumerable<ISubReportDataSource> subReportDataSources = null)
+            : this(reportFormat, 
+                reportLoader, 
                 reportParameters != null ? reportParameters.ToList() : null,
                 mode,
                 localReportDataSources,
@@ -58,97 +54,24 @@ namespace MvcReportViewer
 
         public ReportRunner(
             ReportFormat reportFormat,
-            string reportPath,
+            IReportLoader reportLoader,
             IEnumerable<KeyValuePair<string, object>> reportParameters,
-            ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, IGenericDataSource> localReportDataSources = null,
-            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
-            : this(reportFormat,
-                reportPath, 
-                null, 
-                null, 
-                null, 
-                reportParameters, 
-                mode, 
-                localReportDataSources, 
-                subReportDataSources)
-        {
-        }
-
-        public ReportRunner(
-            ReportFormat reportFormat,
-            string reportPath,
-            string reportServerUrl,
-            string username,
-            string password,
-            IDictionary<string, object> reportParameters,
-            ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, IGenericDataSource> localReportDataSources = null,
-            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
-            : this(
-                reportFormat, 
-                reportPath, 
-                reportServerUrl, 
-                username, 
-                password, 
-                reportParameters != null ? reportParameters.ToList() : null,
-                mode,
-                localReportDataSources,
-                subReportDataSources)
-        {
-        }
-
-        public ReportRunner(
-            ReportFormat reportFormat,
-            string reportPath,
-            string reportServerUrl,
-            string username,
-            string password,
-            IEnumerable<KeyValuePair<string, object>> reportParameters,
-            ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, IGenericDataSource> localReportDataSources = null,
-            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
+            ProcessingMode mode,
+            IEnumerable<IDataSource> reportDataSources = null,
+            IEnumerable<ISubReportDataSource> subReportDataSources = null)
         {
             _reportFormat = reportFormat;
 
             _viewerParameters.ProcessingMode = mode;
-            if (mode == ProcessingMode.Local && localReportDataSources != null)
+            if (mode == ProcessingMode.Local && reportDataSources != null)
             {
-                _viewerParameters.LocalReportDataSources = localReportDataSources;
+                _viewerParameters.ReportDataSources = reportDataSources;
                 _viewerParameters.SubReportDataSources = subReportDataSources;
             }
 
-            _viewerParameters.ReportPath = reportPath;
-            _viewerParameters.ReportServerUrl = reportServerUrl ?? _viewerParameters.ReportServerUrl;
-            if (username != null || password != null)
-            {
-                _viewerParameters.Username = username;
-                _viewerParameters.Password = password;
-            }
+            _viewerParameters.ReportLoader = reportLoader;
 
-            ParseParameters(reportParameters);
-        }
-
-        public ReportRunner(
-            ReportFormat reportFormat,
-            string reportAssemblyName,
-            string reportEmbeddedName,
-            IEnumerable<KeyValuePair<string, object>> reportParameters,
-            ProcessingMode mode = ProcessingMode.Remote,
-            IDictionary<string, IGenericDataSource> localReportDataSources = null,
-            IDictionary<string, ISubReportDataSource> subReportDataSources = null)
-        {
-            _reportFormat = reportFormat;
-
-            _viewerParameters.ProcessingMode = mode;
-            if (mode == ProcessingMode.Local && localReportDataSources != null)
-            {
-                _viewerParameters.LocalReportDataSources = localReportDataSources;
-                _viewerParameters.SubReportDataSources = subReportDataSources;
-            }
-
-            _viewerParameters.ReportAssembly = reportAssemblyName;
-            _viewerParameters.ReportEmbeddedResource = reportEmbeddedName;
+            reportLoader.SetViewerParamerters(_viewerParameters);
 
             ParseParameters(reportParameters);
         }
@@ -195,11 +118,11 @@ namespace MvcReportViewer
 
                 localReport.SubreportProcessing += localReport_SubreportProcessing;
                 
-                if (_viewerParameters.LocalReportDataSources != null)
+                if (_viewerParameters.ReportDataSources != null)
                 {
-                    foreach(var dataSource in _viewerParameters.LocalReportDataSources)
+                    foreach(var dataSource in _viewerParameters.ReportDataSources)
                     {
-                        ReportDataSource reportDataSource = dataSource.Value.CreateDataSource(dataSource.Key);
+                        ReportDataSource reportDataSource = dataSource.CreateDataSource();
 
                         localReport.DataSources.Add(reportDataSource);
                     }
@@ -227,13 +150,14 @@ namespace MvcReportViewer
 
         void localReport_SubreportProcessing(object sender, SubreportProcessingEventArgs e)
         {
-            var subReportDataSource = _viewerParameters.SubReportDataSources[e.ReportPath];
+            var subReportDataSources = _viewerParameters.SubReportDataSources.Where(sr => sr.ReportPath == e.ReportPath);
             
-            var reportDataSource = subReportDataSource.CreateDataSource(e.Parameters);
+            foreach(var subReportDataSource in subReportDataSources)
+            {
+                var reportDataSource = subReportDataSource.CreateDataSource(e.Parameters);
 
-            e.DataSources.Add(reportDataSource);
-
-            //localReport.Refresh();
+                e.DataSources.Add(reportDataSource);
+            }
         }
 
         private void ParseParameters(IEnumerable<KeyValuePair<string, object>> reportParameters)
@@ -266,7 +190,7 @@ namespace MvcReportViewer
                 throw new MvcReportViewerException("Report Server is not specified.");
             }
 
-            if (string.IsNullOrEmpty(_viewerParameters.ReportEmbeddedResource) 
+            if (string.IsNullOrEmpty(_viewerParameters.MainReportResourceName) 
                 && string.IsNullOrEmpty(_viewerParameters.ReportPath))
             {
                 throw new MvcReportViewerException("Report is not specified.");

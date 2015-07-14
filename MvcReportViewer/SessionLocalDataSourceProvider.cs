@@ -18,7 +18,7 @@ namespace MvcReportViewer
             throw new NotSupportedException();
         }
 
-        public void Add(Guid reportControlId, ReportDataSource dataSource)
+        public void Add(Guid reportControlId, IDataSource dataSource)
         {
             if (dataSource == null)
             {
@@ -26,28 +26,8 @@ namespace MvcReportViewer
             }
 
             var key = GetSessionValueKey(reportControlId);
-            var dataSources = _session[key] as List<ReportDataSourceWrapper>;
-            dataSources = dataSources ?? new List<ReportDataSourceWrapper>();
-
-            if(dataSource.Value is DataTable)
-            {
-                dataSources.Add(
-                new ReportDataSourceWrapper
-                {
-                    Name = dataSource.Name,
-                    Value = (DataTable)dataSource.Value
-                });
-            }
-            
-            else if(dataSource.Value is IEnumerable)
-            {
-                dataSources.Add(
-                new ReportDataSourceWrapper2
-                {
-                    Name = dataSource.Name,
-                    Value = (IEnumerable)dataSource.Value
-                });
-            }
+            var dataSources = _session[key] as List<IDataSource>;
+            dataSources = dataSources ?? new List<IDataSource>();
 
             _session[key] = dataSources;
         }
@@ -55,32 +35,15 @@ namespace MvcReportViewer
         public IEnumerable<ReportDataSource> Get(Guid reportControlId)
         {
             var key = GetSessionValueKey(reportControlId);
-            var dataSources = _session[key] as List<ReportDataSourceWrapper>;
+            var dataSources = _session[key] as List<IDataSource>;
             var dataSourceList = new List<ReportDataSource>();
 
             foreach(var dataSource in dataSources)
             {
-                if(dataSource is ReportDataSourceWrapper2)
-                    dataSourceList.Add(new ReportDataSource(dataSource.Name, ((ReportDataSourceWrapper2)dataSource).Value));
-                else
-                    dataSourceList.Add(new ReportDataSource(dataSource.Name, dataSource.Value));
+                dataSourceList.Add(dataSource.CreateDataSource());
             }
 
             return dataSourceList;
-        }
-
-        [Serializable]
-        private class ReportDataSourceWrapper
-        {
-            public string Name { get; set; }
-
-            public DataTable Value { get; set; }
-        }
-
-        [Serializable]
-        private class ReportDataSourceWrapper2 : ReportDataSourceWrapper
-        {
-            public new IEnumerable Value { get; set; }
         }
     }
 }

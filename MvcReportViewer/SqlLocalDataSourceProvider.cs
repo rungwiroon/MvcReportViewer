@@ -38,7 +38,7 @@ namespace MvcReportViewer
             _session[key] = dataSources;
         }
 
-        public void Add(Guid reportControlId, ReportDataSource dataSource)
+        public void Add(Guid reportControlId, IDataSource dataSource)
         {
             throw new NotSupportedException();
         }

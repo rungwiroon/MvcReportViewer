@@ -55,7 +55,7 @@ namespace MvcReportViewer.Example.Controllers
         {
             return this.Report(
                 ReportFormat.PDF,
-                LocalNoDataReportName,
+                new LocalReportLoader(LocalNoDataReportName),
                 new { TodayDate = DateTime.Now },
                 ProcessingMode.Local);
         }
@@ -81,27 +81,28 @@ namespace MvcReportViewer.Example.Controllers
             {
                 return this.Report(
                     format,
-                    LocalReportName,
+                    new LocalReportLoader(LocalReportName),
                     new { Parameter1 = "Test", Parameter2 = 123 },
                     ProcessingMode.Local,
-                    new Dictionary<string, IGenericDataSource>
+                    new IDataSource[]
                     {
-                        { "Products", new DataTableDataSource(GetProducts()) },
-                        { "Cities", new DataTableDataSource(GetCities()) }
+                        new DataTableDataSource("Products", GetProducts()),
+                        new DataTableDataSource("Cities", GetCities())
                     });
             }
 
             return this.Report(
                 format,
-                RemoteReportName,
-                new { Parameter1 = "Hello World!", Parameter2 = DateTime.Now, Parameter3 = 12345 });
+                new RemoteServerLoader(RemoteReportName),
+                new { Parameter1 = "Hello World!", Parameter2 = DateTime.Now, Parameter3 = 12345 },
+                ProcessingMode.Remote);
         }
 
         private ActionResult DownloadReportMultipleValues(ReportFormat format)
         {
             return this.Report(
                 format,
-                RemoteReportName,
+                new RemoteServerLoader(RemoteReportName),
                 new List<KeyValuePair<string, object>>
                 {
                     new KeyValuePair<string, object>("Parameter1", "Value 1"),
@@ -109,7 +110,8 @@ namespace MvcReportViewer.Example.Controllers
                     new KeyValuePair<string, object>("Parameter2", DateTime.Now),
                     new KeyValuePair<string, object>("Parameter2", DateTime.Now.AddYears(10)),
                     new KeyValuePair<string, object>("Parameter3", 12345)
-                });
+                },
+                ProcessingMode.Remote);
         }
 
         public ActionResult LocalReports()
@@ -138,13 +140,14 @@ namespace MvcReportViewer.Example.Controllers
         {
             return this.Report(
                 ReportFormat.Excel,
-                "ReportLibraryExample",
-                "ReportLibrary.Example.ReportFiles.ProductReport.rdlc",
+                new LocalReportAssemblyResourceLoader(
+                    "ReportLibraryExample",
+                    "ReportLibrary.Example.ReportFiles.ProductReport.rdlc"),
                 new { Parameter1 = "Test", Parameter2 = 123 },
                 ProcessingMode.Local,
-                new Dictionary<string, IGenericDataSource>
+                new IDataSource[]
                 {
-                    { "Products", new EnumerableDataSource(GetProducts2()) }
+                    new EnumerableDataSource("Products", GetProducts2())
                 });
         }
 
@@ -152,25 +155,29 @@ namespace MvcReportViewer.Example.Controllers
         {
             return this.Report(
                 ReportFormat.Excel,
-                "ReportLibraryExample",
-                "ReportLibrary.Example.ReportFiles.ProductWithDetail.rdlc",
+
+                new LocalReportAssemblyResourceLoader(
+                    "ReportLibraryExample",
+                    "ReportLibrary.Example.ReportFiles.ProductWithDetail.rdlc",
+                    new SubReportResourceName[]
+                    {
+                        new SubReportResourceName("ProductDetailReport", "ReportLibrary.Example.ReportFiles.ProductDetailReport.rdlc")
+                    }),
+
                 new { Parameter1 = "Test", Parameter2 = 123 },
                 ProcessingMode.Local,
-                new Dictionary<string, IGenericDataSource>
+
+                new IDataSource[]
                 {
-                    { "Products", new EnumerableDataSource(GetProducts2()) }
+                    new EnumerableDataSource("Products", GetProducts2())
                 },
                 
-                new Dictionary<string, ISubReportDataSource>
+                new ISubReportDataSource[]
                 {
-                    {
+                    new SubReportEnumerableDataSource<ProductDetailModel>(
                         "ProductDetailReport",
-                        new SubReportEnumerableDataSource<ProductDetailModel>(
-                            "ReportLibrary.Example.ReportFiles.ProductDetailReport.rdlc",
-                            "ProductDetails", 
-                            new GenericEnumerableDataSource<ProductDetailModel>(GetProductDetails()), 
+                        new GenericEnumerableDataSource<ProductDetailModel>("ProductDetails", GetProductDetails()), 
                             (parameters, data) => data.Where(pd => pd.ProductId == int.Parse((parameters["ProductId"].Values[0])))) 
-                    }
                 });
         }
 

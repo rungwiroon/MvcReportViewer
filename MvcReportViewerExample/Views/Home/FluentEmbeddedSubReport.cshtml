@@ -1,0 +1,48 @@
+﻿@using System.Drawing
+@using System.Web.UI.WebControls
+@using Microsoft.Reporting.WebForms;
+@using MvcReportViewer;
+@using MvcReportViewer.Example.Models;
+
+@model EmbeddedReportModel
+
+@{
+    ViewBag.Title = "MvcReportViewer Fluent SubReport Example";
+}
+
+@section Code {
+    @@{
+        var settings = new ControlSettings
+            {
+                ShowParameterPrompts = true,
+                ShowFindControls = true,
+                BackColor = Color.BurlyWood,
+                KeepSessionAlive = true,
+                Width = new Unit("100%"),
+                Height = new Unit("800px"),
+                AsyncRendering = false
+            };
+    }
+    @@Html.MvcReportViewerFluent("ReportLibraryExample", "ReportLibrary.Example.ProductReport.rdlc").ProcessingMode(ProcessingMode.Local).ReportParameters(new { Parameter1 = "Test", Parameter2 = 123 }).LocalDataSource2("Products", Model.Products).Attributes(new { Height = 900, Width = 900, style = "border: none" }).ControlSettings(settings)
+}
+
+@{
+    var reportAssemblyName = "ReportLibraryExample";
+    var reportEmbeddedName = "ReportLibrary.Example.ReportFiles.ProductReport.rdlc";
+    var parameters = new { Parameter1 = "Test", Parameter2 = 123 };
+
+    var attributes = new { Height = 900, Width = 900, style = "border: none" };
+    
+    var settings = new ControlSettings
+        {
+            ShowParameterPrompts = true,
+            ShowFindControls = true,
+            BackColor = Color.BurlyWood,
+            KeepSessionAlive = true,
+            Width = new Unit("100%"),
+            Height = new Unit("800px"),
+            AsyncRendering = false
+        };
+}
+
+@Html.MvcReportViewerFluent(reportAssemblyName, reportEmbeddedName).ProcessingMode(ProcessingMode.Local).ReportParameters(parameters).LocalDataSource2("Products", Model.Products).LocalSubReportDataSource().Attributes(attributes).ControlSettings(settings)

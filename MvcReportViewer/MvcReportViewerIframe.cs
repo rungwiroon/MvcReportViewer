@@ -630,27 +630,12 @@ if (formElement{0}) {{
         /// Registers local data source.
         /// </summary>
         /// <param name="dataSourceName">Report data source name.</param>
-        /// <param name="dataTable">The data.</param>
-        /// <returns></returns>
-        public IMvcReportViewerOptions LocalDataSource(string dataSourceName, DataTable dataTable)
-        {
-            var provider = LocalReportDataSourceProviderFactory.Current.Create();
-            var dataSource = new ReportDataSource(dataSourceName, dataTable);
-            provider.Add(ControlId, dataSource);
-
-            return this;
-        }
-
-        /// <summary>
-        /// Registers local data source.
-        /// </summary>
-        /// <param name="dataSourceName">Report data source name.</param>
         /// <param name="enumerable">The data.</param>
         /// <returns></returns>
-        public IMvcReportViewerOptions LocalDataSource2(string dataSourceName, IEnumerable enumerable)
+        public IMvcReportViewerOptions LocalDataSource(string dataSourceName, IDataSource dataSource)
         {
             var provider = LocalReportDataSourceProviderFactory.Current.Create();
-            var dataSource = new ReportDataSource(dataSourceName, enumerable);
+
             provider.Add(ControlId, dataSource);
 
             return this;

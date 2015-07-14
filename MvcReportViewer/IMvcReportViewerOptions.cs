@@ -91,11 +91,9 @@ namespace MvcReportViewer
         /// Registers local data source.
         /// </summary>
         /// <param name="dataSourceName">Report data source name.</param>
-        /// <param name="dataTable">The data.</param>
+        /// <param name="dataSource">The data.</param>
         /// <returns></returns>
-        IMvcReportViewerOptions LocalDataSource(string dataSourceName, DataTable dataTable);
-
-        IMvcReportViewerOptions LocalDataSource2(string dataSourceName, IEnumerable dataTable);
+        IMvcReportViewerOptions LocalDataSource(string dataSourceName, IDataSource dataSource);
 
         /// <summary>
         /// Registers custom local data source, e.g. SQL query

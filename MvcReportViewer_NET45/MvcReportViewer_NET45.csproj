@@ -90,8 +90,8 @@
     <Compile Include="..\MvcReportViewer\ControlSettingsManager.cs">
       <Link>ControlSettingsManager.cs</Link>
     </Compile>
-    <Compile Include="..\MvcReportViewer\GenericDataSource.cs">
-      <Link>GenericDataSource.cs</Link>
+    <Compile Include="..\MvcReportViewer\DataSource.cs">
+      <Link>DataSource.cs</Link>
     </Compile>
     <Compile Include="..\MvcReportViewer\IgnoreCaseExtensions.cs">
       <Link>IgnoreCaseExtensions.cs</Link>
@@ -123,6 +123,9 @@
     </Compile>
     <Compile Include="..\MvcReportViewer\ReportFormat.cs">
       <Link>ReportFormat.cs</Link>
+    </Compile>
+    <Compile Include="..\MvcReportViewer\ReportLoader.cs">
+      <Link>ReportLoader.cs</Link>
     </Compile>
     <Compile Include="..\MvcReportViewer\ReportRunner.cs">
       <Link>ReportRunner.cs</Link>

@@ -22,7 +22,7 @@ namespace MvcReportViewer
         /// </summary>
         /// <param name="reportControlId">Internal MvcReportViewer instance ID.</param>
         /// <param name="dataSource">Report Data Source.</param>
-        void Add(Guid reportControlId, ReportDataSource dataSource);
+        void Add(Guid reportControlId, IDataSource dataSource);
 
         /// <summary>
         /// Gets data sources used for the report.

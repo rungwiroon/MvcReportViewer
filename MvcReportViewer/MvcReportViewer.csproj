@@ -77,6 +77,7 @@
     <Compile Include="ControlSettings.cs" />
     <Compile Include="ControlSettingsManager.cs" />
     <Compile Include="DataSource.cs" />
+    <Compile Include="HtmlFormFieldBuilder.cs" />
     <Compile Include="ILocalReportDataSourceProvider.cs" />
     <Compile Include="IMvcReportViewerOptions.cs" />
     <Compile Include="LocalReportDataSourceProviderFactory.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="MvcReportViewerIframe.cs" />
     <Compile Include="ReportLoader.cs" />
     <Compile Include="ReportFormat.cs" />
+    <Compile Include="ReportLoaderFactory.cs" />
     <Compile Include="ReportRunner.cs" />
     <Compile Include="ReportRunnerExtensions.cs" />
     <Compile Include="ReportServerCredentials.cs" />

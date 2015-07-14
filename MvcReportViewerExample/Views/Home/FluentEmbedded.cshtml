@@ -27,8 +27,8 @@
 }
 
 @{
-    var reportAssemblyName = "ReportLibraryExample";
-    var reportEmbeddedName = "ReportLibrary.Example.ReportFiles.ProductReport.rdlc";
+    var loader = new LocalReportAssemblyResourceLoader("ReportLibraryExample", "ReportLibrary.Example.ReportFiles.ProductReport.rdlc");
+    var dataSource = new EnumerableDataSource("Products", Model.Products);
     var parameters = new { Parameter1 = "Test", Parameter2 = 123 };
 
     var attributes = new { Height = 900, Width = 900, style = "border: none" };
@@ -45,4 +45,4 @@
         };
 }
 
-@Html.MvcReportViewerFluent(reportAssemblyName, reportEmbeddedName).ProcessingMode(ProcessingMode.Local).ReportParameters(parameters).LocalDataSource2("Products", Model.Products).Attributes(attributes).ControlSettings(settings)
+@Html.MvcReportViewerFluent(loader).ProcessingMode(ProcessingMode.Local).ReportParameters(parameters).LocalDataSource(dataSource).Attributes(attributes).ControlSettings(settings)

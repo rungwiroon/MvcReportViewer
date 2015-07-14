@@ -4,11 +4,15 @@
     {
         public static readonly string ReportServerUrl = "_s";
 
+        public static readonly string ReportType = "_rt";
+
         public static readonly string ReportPath = "_r";
 
         public static readonly string ReportAssemblyName = "_ra";
 
-        public static readonly string ReportEmbeddedName = "_re";
+        public static readonly string ReportResourceName = "_re";
+
+        public static readonly string SubReportResourceNames = "_sr";
 
         public static readonly string Username = "_u";
 

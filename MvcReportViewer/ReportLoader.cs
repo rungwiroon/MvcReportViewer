@@ -1,6 +1,7 @@
 ﻿using Microsoft.Reporting.WebForms;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -9,30 +10,65 @@ using System.Text;
 
 namespace MvcReportViewer
 {
+    public enum ReportLoaderType
+    {
+        LocalReportLoader = 1,
+        LocalReportAssemblyResourceLoader = 2,
+        RemoteServerLoader = 3,
+        RemoteAzureLoader = 4
+    }
+
     public interface IReportLoader
     {
-        void SetViewerParamerters(ReportViewerParameters viwerParameters);
-        void LoadReport(ReportViewer reportViewer);
+        void LoadReportTo(ReportViewer reportViewer);
+
+        void BuildViewerFormFields(HtmlFormFieldBuilder html);
+
+        void BuildViewerUri(NameValueCollection query);
     }
 
     public class LocalReportLoader : IReportLoader
     {
         public string ReportPath { get; private set; }
 
+        public LocalReportLoader()
+        {
+
+        }
+
         public LocalReportLoader(string reportPath)
+        {
+            SetByPath(reportPath);
+        }
+
+        public void SetByPath(string reportPath)
         {
             ReportPath = reportPath;
         }
 
-        public void LoadReport(ReportViewer reportViewer)
+        public LocalReportLoader(NameValueCollection queryString, bool isEncrypted)
+        {
+            var urlParam = queryString[UriParameters.ReportPath];
+
+            ReportPath = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
+        }
+
+        public void LoadReportTo(ReportViewer reportViewer)
         {
             var localReport = reportViewer.LocalReport;
             localReport.ReportPath = ReportPath;
         }
 
-        public void SetViewerParamerters(ReportViewerParameters viewerParameters)
+        public void BuildViewerFormFields(HtmlFormFieldBuilder html)
         {
-            viewerParameters.ReportPath = ReportPath;
+            html.AddField(UriParameters.ReportType, (int)ReportLoaderType.LocalReportLoader);
+            html.AddField(UriParameters.ReportPath, ReportPath);
+        }
+
+        public void BuildViewerUri(NameValueCollection query)
+        {
+            query[UriParameters.ReportType] = ((int)ReportLoaderType.LocalReportLoader).ToString();
+            query[UriParameters.ReportPath] = ReportPath;
         }
     }
 
@@ -56,6 +92,8 @@ namespace MvcReportViewer
 
         public IEnumerable<SubReportResourceName> SubReportResourceNames { get; private set; }
 
+        private string _subReportNames;
+
         public LocalReportAssemblyResourceLoader(string assemblyName, string mainReportEmbeddedResourceName, IEnumerable<SubReportResourceName> subReportEmbeddedResourceNames = null)
         {
             AssemblyName = assemblyName;
@@ -63,7 +101,18 @@ namespace MvcReportViewer
             SubReportResourceNames = subReportEmbeddedResourceNames;
         }
 
-        public void LoadReport(ReportViewer reportViewer)
+        public LocalReportAssemblyResourceLoader(NameValueCollection queryString, bool isEncrypted)
+        {
+            var urlParam1 = queryString[UriParameters.ReportAssemblyName];
+            AssemblyName = isEncrypted ? SecurityUtil.Decrypt(urlParam1) : urlParam1;
+
+            var urlParam2 = queryString[UriParameters.ReportResourceName];
+            MainReportResourceName = isEncrypted ? SecurityUtil.Decrypt(urlParam2) : urlParam2;
+
+            //var urlParam3 = queryString[UriParameters.SubReportResourceNames];
+        }
+
+        public void LoadReportTo(ReportViewer reportViewer)
         {
             var localReport = reportViewer.LocalReport;
 
@@ -77,14 +126,25 @@ namespace MvcReportViewer
             {
                 Stream subReportStream = assembly.GetManifestResourceStream(subReport.ResourceName);
                 localReport.LoadSubreportDefinition(subReport.ReportName, subReportStream);
+
+                _subReportNames += subReport.ResourceName + ";";
             }
         }
 
-        public void SetViewerParamerters(ReportViewerParameters viewerParameters)
+        public void BuildViewerFormFields(HtmlFormFieldBuilder html)
         {
-            viewerParameters.ReportAssemblyName = AssemblyName;
-            viewerParameters.MainReportResourceName = MainReportResourceName;
-            viewerParameters.SubReportResourceNames = "Not implement!!!";
+            html.AddField(UriParameters.ReportType, (int)ReportLoaderType.LocalReportAssemblyResourceLoader);
+            html.AddField(UriParameters.ReportAssemblyName, AssemblyName);
+            html.AddField(UriParameters.ReportResourceName, MainReportResourceName);
+            html.AddField(UriParameters.SubReportResourceNames, MainReportResourceName);
+        }
+
+        public void BuildViewerUri(NameValueCollection query)
+        {
+            query[UriParameters.ReportType] = ((int)ReportLoaderType.LocalReportAssemblyResourceLoader).ToString();
+            query[UriParameters.ReportAssemblyName] = AssemblyName;
+            query[UriParameters.ReportResourceName] = MainReportResourceName;
+            query[UriParameters.SubReportResourceNames] = _subReportNames;
         }
     }
 
@@ -111,18 +171,41 @@ namespace MvcReportViewer
             Password = ConfigurationManager.AppSettings[WebConfigSettings.Password];
         }
 
-        public abstract void LoadReport(ReportViewer reportViewer);
-
-        public void SetViewerParamerters(ReportViewerParameters viewerParameters)
+        public RemoteReportLoader(NameValueCollection queryString, bool isEncrypted)
         {
-            viewerParameters.ReportPath = ReportPath;
-            viewerParameters.ReportServerUrl = ReportServerUrl ?? viewerParameters.ReportServerUrl;
-            if (Username != null || Password != null)
+            var urlParam1 = queryString[UriParameters.ReportServerUrl];
+            ReportServerUrl = isEncrypted ? SecurityUtil.Decrypt(urlParam1) : urlParam1;
+
+            var urlParam2 = queryString[UriParameters.Username];
+            Username = isEncrypted ? SecurityUtil.Decrypt(urlParam2) : urlParam2;
+
+            var urlParam3 = queryString[UriParameters.Password];
+            Password = isEncrypted ? SecurityUtil.Decrypt(urlParam3) : urlParam3;
+        }
+
+        public abstract void LoadReportTo(ReportViewer reportViewer);
+
+        public virtual void BuildViewerFormFields(HtmlFormFieldBuilder html)
+        {
+            html.AddField(UriParameters.ReportServerUrl, ReportServerUrl);
+
+            if (!string.IsNullOrEmpty(Username) || !string.IsNullOrEmpty(Password))
             {
-                viewerParameters.Username = Username;
-                viewerParameters.Password = Password;
+                html.AddField(UriParameters.Username, Username);
+                html.AddField(UriParameters.Password, Password);
             }
         }
+
+        public virtual void BuildViewerUri(NameValueCollection query)
+        {
+            query[UriParameters.ReportServerUrl] = ReportServerUrl;
+
+            if (!string.IsNullOrEmpty(Username) || !string.IsNullOrEmpty(Password))
+            {
+                query[UriParameters.Username] = Username;
+                query[UriParameters.Password] = Password;
+            }
+        }        
     }
 
     public class RemoteServerLoader : RemoteReportLoader
@@ -139,7 +222,7 @@ namespace MvcReportViewer
             
         }
 
-        public override void LoadReport(ReportViewer reportViewer)
+        public override void LoadReportTo(ReportViewer reportViewer)
         {
             var serverReport = reportViewer.ServerReport;
 
@@ -171,7 +254,7 @@ namespace MvcReportViewer
             
         }
 
-        public override void LoadReport(ReportViewer reportViewer)
+        public override void LoadReportTo(ReportViewer reportViewer)
         {
             var serverReport = reportViewer.ServerReport;
 

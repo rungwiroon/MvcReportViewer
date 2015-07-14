@@ -30,6 +30,7 @@ namespace MvcReportViewer
             try
             {
                 var parser = new ReportViewerParametersParser();
+
                 var parameters = Request.Form.Count > 0 ? parser.Parse(Request.Form) : parser.Parse(Request.QueryString);
 
                 var hasHeightChangedScript = string.Format(
@@ -38,6 +39,7 @@ namespace MvcReportViewer
                 ClientScript.RegisterStartupScript(GetType(), "IsHeightChangedJS", hasHeightChangedScript);
 
                 ReportViewer.ReportError += OnReportError;
+
                 ReportViewer.Initialize(parameters);
 
                 RegisterJavaScriptApi();

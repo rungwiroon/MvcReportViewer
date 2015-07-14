@@ -18,11 +18,11 @@ namespace MvcReportViewer
         /// <returns>An HTML <b>iframe</b> element.</returns>
         public static MvcReportViewerIframe MvcReportViewer(
             this HtmlHelper helper,
-            string reportPath,
+            IReportLoader reportLoader,
             object htmlAttributes)
         {
             return new MvcReportViewerIframe(
-                reportPath, 
+                reportLoader, 
                 HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
 
@@ -35,13 +35,13 @@ namespace MvcReportViewer
         /// <param name="htmlAttributes">An object that contains the HTML attributes to set for the element.</param>
         /// <returns>An HTML <b>iframe</b> element.</returns>
         public static MvcReportViewerIframe MvcReportViewer(
-            this HtmlHelper helper, 
-            string reportPath, 
+            this HtmlHelper helper,
+            IReportLoader reportLoader,
             object reportParameters, 
             object htmlAttributes)
         {
             return new MvcReportViewerIframe(
-                reportPath,
+                reportLoader,
                 HtmlHelper.AnonymousObjectToHtmlAttributes(reportParameters),
                 HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
@@ -56,12 +56,12 @@ namespace MvcReportViewer
         /// <returns>An HTML <b>iframe</b> element.</returns>
         public static MvcReportViewerIframe MvcReportViewer(
             this HtmlHelper helper,
-            string reportPath,
+            IReportLoader reportLoader,
             IEnumerable<KeyValuePair<string, object>> reportParameters,
             object htmlAttributes)
         {
             return new MvcReportViewerIframe(
-                reportPath,
+                reportLoader,
                 reportParameters,
                 HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes));
         }
@@ -81,20 +81,14 @@ namespace MvcReportViewer
         /// <returns>An HTML <b>iframe</b> element.</returns>
         public static MvcReportViewerIframe MvcReportViewer(
             this HtmlHelper helper,
-            string reportPath,
-            string reportServerUrl = null,
-            string username = null,
-            string password = null,
+            IReportLoader reportLoader,
             IEnumerable<KeyValuePair<string, object>> reportParameters = null,
             ControlSettings controlSettings = null,
             object htmlAttributes = null,
             FormMethod method = FormMethod.Get)
         {
             return new MvcReportViewerIframe(
-                reportPath,
-                reportServerUrl,
-                username,
-                password,
+                reportLoader,
                 reportParameters,
                 controlSettings,
                 HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes),
@@ -105,28 +99,13 @@ namespace MvcReportViewer
         /// Returns fluent interface to HTML <b>iframe</b> rendering ASP.NET ReportViewer control.
         /// </summary>
         /// <param name="helper">The HTML helper instance that this method extends.</param>
-        /// <param name="reportPath">The path to the report on the server.</param>
+        /// <param name="reportLoader">The path to the report on the server.</param>
         /// <returns>Fluent interface HTML <b>iframe</b> element.</returns>
         public static IMvcReportViewerOptions MvcReportViewerFluent(
             this HtmlHelper helper,
-            string reportPath)
+            IReportLoader reportLoader)
         {
-            return new MvcReportViewerIframe(reportPath);
-        }
-
-        /// <summary>
-        /// Returns fluent interface to HTML <b>iframe</b> rendering ASP.NET ReportViewer control.
-        /// </summary>
-        /// <param name="helper">The HTML helper instance that this method extends.</param>
-        /// <param name="reportAssemblyName">The assembly name that store rdlc files.</param>
-        /// <param name="reportEmbeddedName">The path to the embedded report in assembly.</param>
-        /// <returns>Fluent interface HTML <b>iframe</b> element.</returns>
-        public static IMvcReportViewerOptions MvcReportViewerFluent(
-            this HtmlHelper helper,
-            string reportAssemblyName,
-            string reportEmbeddedName)
-        {
-            return new MvcReportViewerIframe(reportAssemblyName, reportEmbeddedName);
+            return new MvcReportViewerIframe(reportLoader);
         }
 
         /// <summary>
@@ -138,10 +117,10 @@ namespace MvcReportViewer
         /// <returns>Fluent interface HTML <b>iframe</b> element.</returns>
         internal static IMvcReportViewerOptions MvcReportViewerFluent(
             this HtmlHelper helper,
-            string reportPath,
+            IReportLoader reportLoader,
             Guid controlId)
         {
-            var iframe = new MvcReportViewerIframe(reportPath);
+            var iframe = new MvcReportViewerIframe(reportLoader);
             iframe.ControlId = controlId;
             return iframe;
         }

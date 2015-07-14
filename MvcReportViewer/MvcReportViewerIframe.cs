@@ -27,17 +27,7 @@ if (formElement{0}) {{
 ";
         private readonly ControlSettingsManager _settingsManager = new ControlSettingsManager();
 
-        private string _reportPath;
-
-        private string _reportAssemblyName;
-
-        private string _reportEmbeddedName;
-
-        private string _reportServerUrl;
-
-        private string _username;
-
-        private string _password;
+        private IReportLoader _reportLoader;
 
         private FormMethod _method;
 
@@ -57,18 +47,8 @@ if (formElement{0}) {{
         /// Creates an instance of MvcReportViewerIframe class.
         /// </summary>
         /// <param name="reportPath">The path to the report on the server.</param>
-        public MvcReportViewerIframe(string reportPath)
-            : this(reportPath, null, null, null, null, null, null, FormMethod.Get)
-        {
-        }
-
-        /// <summary>
-        /// Creates an instance of MvcReportViewerIframe class.
-        /// </summary>
-        /// <param name="reportAssemblyName">The path to the report on the server.</param>
-        /// <param name="reportEmbeddedName">The path to the report on the server.</param>
-        public MvcReportViewerIframe(string reportAssemblyName, string reportEmbeddedName)
-            : this(reportAssemblyName, reportEmbeddedName, null, null, null, FormMethod.Get)
+        public MvcReportViewerIframe(IReportLoader reportLoader)
+            : this(reportLoader, null, null, null, FormMethod.Get)
         {
         }
 
@@ -78,9 +58,9 @@ if (formElement{0}) {{
         /// <param name="reportPath">The path to the report on the server.</param>
         /// <param name="htmlAttributes">An object that contains the HTML attributes to set for the element.</param>
         public MvcReportViewerIframe(
-            string reportPath,
+            IReportLoader reportLoader,
             IDictionary<string, object> htmlAttributes)
-            : this(reportPath, null, null, null, null, null, htmlAttributes, FormMethod.Get)
+            : this(reportLoader, null, null, htmlAttributes, FormMethod.Get)
         {
         }
 
@@ -91,10 +71,10 @@ if (formElement{0}) {{
         /// <param name="reportParameters">The report parameter properties for the report.</param>
         /// <param name="htmlAttributes">An object that contains the HTML attributes to set for the element.</param>
         public MvcReportViewerIframe(
-            string reportPath,
+            IReportLoader reportLoader,
             IDictionary<string, object> reportParameters,
             IDictionary<string, object> htmlAttributes)
-            : this(reportPath, null, null, null, reportParameters, null, htmlAttributes, FormMethod.Get)
+            : this(reportLoader, reportParameters, null, htmlAttributes, FormMethod.Get)
         {
         }
 
@@ -105,10 +85,10 @@ if (formElement{0}) {{
         /// <param name="reportParameters">The report parameter properties for the report.</param>
         /// <param name="htmlAttributes">An object that contains the HTML attributes to set for the element.</param>
         public MvcReportViewerIframe(
-            string reportPath,
+            IReportLoader reportLoader,
             IEnumerable<KeyValuePair<string, object>> reportParameters,
             IDictionary<string, object> htmlAttributes)
-            : this(reportPath, null, null, null, reportParameters, null, htmlAttributes, FormMethod.Get)
+            : this(reportLoader, reportParameters, null, htmlAttributes, FormMethod.Get)
         {
         }
 
@@ -124,40 +104,7 @@ if (formElement{0}) {{
         /// <param name="htmlAttributes">An object that contains the HTML attributes to set for the element.</param>
         /// <param name="method">Method for sending parameters to the iframe, either GET or POST.</param>
         public MvcReportViewerIframe(
-            string reportPath,
-            string reportServerUrl,
-            string username,
-            string password,
-            IDictionary<string, object> reportParameters,
-            ControlSettings controlSettings,
-            IDictionary<string, object> htmlAttributes,
-            FormMethod method)
-            : this(
-                   reportPath, 
-                   reportServerUrl, 
-                   username, 
-                   password, 
-                   reportParameters != null ? reportParameters.ToList() : null, 
-                   controlSettings, 
-                   htmlAttributes, 
-                   method)
-        {
-        }
-
-        /// <summary>
-        /// Creates an instance of MvcReportViewerIframe class.
-        /// </summary>
-        /// <param name="reportPath">The path to the report on the server.</param>
-        /// <param name="reportServerUrl">The URL for the report server.</param>
-        /// <param name="username">The report server username.</param>
-        /// <param name="password">The report server password.</param>
-        /// <param name="reportParameters">The report parameter properties for the report.</param>
-        /// <param name="controlSettings">The Report Viewer control's UI settings.</param>
-        /// <param name="htmlAttributes">An object that contains the HTML attributes to set for the element.</param>
-        /// <param name="method">Method for sending parameters to the iframe, either GET or POST.</param>
-        public MvcReportViewerIframe(
-            string reportAssemblyName,
-            string reportEmbeddedName,
+            IReportLoader reportLoader,
             IDictionary<string, object> reportParameters,
             ControlSettings controlSettings,
             IDictionary<string, object> htmlAttributes,
@@ -169,8 +116,7 @@ if (formElement{0}) {{
                 throw new MvcReportViewerException("MvcReportViewer.js location is not found. Make sure you have MvcReportViewer.AspxViewerJavaScript in your Web.config.");
             }
 
-            _reportAssemblyName = reportAssemblyName;
-            _reportEmbeddedName = reportEmbeddedName;
+            _reportLoader = reportLoader;
 
             _processingMode = Microsoft.Reporting.WebForms.ProcessingMode.Local;
 
@@ -211,10 +157,7 @@ if (formElement{0}) {{
         /// <param name="htmlAttributes">An object that contains the HTML attributes to set for the element.</param>
         /// <param name="method">Method for sending parameters to the iframe, either GET or POST.</param>
         public MvcReportViewerIframe(
-            string reportPath,
-            string reportServerUrl,
-            string username,
-            string password,
+            IReportLoader reportLoader,
             IEnumerable<KeyValuePair<string, object>> reportParameters,
             ControlSettings controlSettings,
             IDictionary<string, object> htmlAttributes,
@@ -226,10 +169,8 @@ if (formElement{0}) {{
                 throw new MvcReportViewerException("MvcReportViewer.js location is not found. Make sure you have MvcReportViewer.AspxViewerJavaScript in your Web.config.");
             }
 
-            _reportPath = reportPath;
-            _reportServerUrl = reportServerUrl;
-            _username = username;
-            _password = password;
+            _reportLoader = reportLoader;
+
             _controlSettings = controlSettings;
             _reportParameters = reportParameters != null ? reportParameters.ToList() : null;
             _htmlAttributes = htmlAttributes;
@@ -332,41 +273,17 @@ if (formElement{0}) {{
 
         private string BuildIframeFormFields()
         {
-            var html = new StringBuilder();
+            var html = new HtmlFormFieldBuilder(_encryptParameters);
 
-            html.Append(CreateHiddenField(UriParameters.ControlId, ControlId));
-            html.Append(CreateHiddenField(UriParameters.ProcessingMode, _processingMode));
+            html.AddField(UriParameters.ControlId, ControlId);
+            html.AddField(UriParameters.ProcessingMode, _processingMode);
 
-            if (!string.IsNullOrEmpty(_reportPath))
-            {
-                html.Append(CreateHiddenField(UriParameters.ReportPath, _reportPath));
-            }
-
-            if(!string.IsNullOrEmpty(_reportAssemblyName))
-            {
-                html.Append(CreateHiddenField(UriParameters.ReportAssemblyName, _reportAssemblyName));
-            }
-
-            if(!string.IsNullOrEmpty(_reportEmbeddedName))
-            {
-                html.Append(CreateHiddenField(UriParameters.ReportEmbeddedName, _reportEmbeddedName));
-            }
-
-            if (!string.IsNullOrEmpty(_reportServerUrl))
-            {
-                html.Append(CreateHiddenField(UriParameters.ReportServerUrl, _reportServerUrl));
-            }
-
-            if (!string.IsNullOrEmpty(_username) || !string.IsNullOrEmpty(_password))
-            {
-                html.Append(CreateHiddenField(UriParameters.Username, _username));
-                html.Append(CreateHiddenField(UriParameters.Password, _password));
-            }
+            _reportLoader.BuildViewerFormFields(html);
 
             var serializedSettings = _settingsManager.Serialize(_controlSettings);
             foreach (var setting in serializedSettings)
             {
-                html.Append(CreateHiddenField(setting.Key, setting.Value));
+                html.AddField(setting.Key, setting.Value);
             }
         
             if (_reportParameters != null)
@@ -379,28 +296,11 @@ if (formElement{0}) {{
                     }
 
                     var value = ConvertValueToString(parameter.Value);
-                    html.Append(CreateHiddenField(parameter.Key, value));
+                    html.AddField(parameter.Key, value);
                 }
             }
 
             return html.ToString();
-        }
-
-        private string CreateHiddenField<T>(string name, T value)
-        {
-            var tag = new TagBuilder("input");
-            tag.MergeAttribute("type", "hidden");
-            tag.MergeAttribute("name", name);
-
-            var strValue = value.ToString();
-            if (_encryptParameters)
-            {
-                strValue = SecurityUtil.Encrypt(strValue);
-            }
-
-            tag.MergeAttribute("value", strValue);
-
-            return tag.ToString();
         }
 
         private string GetIframeUsingGetMethod()
@@ -417,31 +317,8 @@ if (formElement{0}) {{
             var query = HttpUtility.ParseQueryString(string.Empty);
             query[UriParameters.ControlId] = ControlId.ToString();
             query[UriParameters.ProcessingMode] = _processingMode.ToString();
-            if (!string.IsNullOrEmpty(_reportPath))
-            {
-                query[UriParameters.ReportPath] = _reportPath;
-            }
 
-            if (!string.IsNullOrEmpty(_reportAssemblyName))
-            {
-                query[UriParameters.ReportAssemblyName] = _reportAssemblyName;
-            }
-
-            if (!string.IsNullOrEmpty(_reportEmbeddedName))
-            {
-                query[UriParameters.ReportEmbeddedName] = _reportEmbeddedName;
-            }
-
-            if (!string.IsNullOrEmpty(_reportServerUrl))
-            {
-                query[UriParameters.ReportServerUrl] = _reportServerUrl;
-            }
-
-            if (!string.IsNullOrEmpty(_username) || !string.IsNullOrEmpty(_password))
-            {
-                query[UriParameters.Username] = _username;
-                query[UriParameters.Password] = _password;
-            }
+            _reportLoader.BuildViewerUri(query);
 
             var serializedSettings = _settingsManager.Serialize(_controlSettings);
             foreach (var setting in serializedSettings)
@@ -481,50 +358,6 @@ if (formElement{0}) {{
         private string ConvertValueToString(object value)
         {
             return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", value);
-        }
-
-        /// <summary>
-        /// Sets the path to the report on the server.
-        /// </summary>
-        /// <param name="reportPath">The path to the report on the server.</param>
-        /// <returns>An instance of MvcViewerOptions class.</returns>
-        public IMvcReportViewerOptions ReportPath(string reportPath)
-        {
-            _reportPath = reportPath;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the URL for the report server.
-        /// </summary>
-        /// <param name="reportServerUrl">The URL for the report server.</param>
-        /// <returns>An instance of MvcViewerOptions class.</returns>
-        public IMvcReportViewerOptions ReportServerUrl(string reportServerUrl)
-        {
-            _reportServerUrl = reportServerUrl;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the report server username.
-        /// </summary>
-        /// <param name="username">The report server username.</param>
-        /// <returns>An instance of MvcViewerOptions class.</returns>
-        public IMvcReportViewerOptions Username(string username)
-        {
-            _username = username;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the report server password.
-        /// </summary>
-        /// <param name="password">The report server password.</param>
-        /// <returns>An instance of MvcViewerOptions class.</returns>
-        public IMvcReportViewerOptions Password(string password)
-        {
-            _password = password;
-            return this;
         }
 
         /// <summary>
@@ -632,7 +465,7 @@ if (formElement{0}) {{
         /// <param name="dataSourceName">Report data source name.</param>
         /// <param name="enumerable">The data.</param>
         /// <returns></returns>
-        public IMvcReportViewerOptions LocalDataSource(string dataSourceName, IDataSource dataSource)
+        public IMvcReportViewerOptions LocalDataSource(IDataSource dataSource)
         {
             var provider = LocalReportDataSourceProviderFactory.Current.Create();
 
@@ -641,18 +474,10 @@ if (formElement{0}) {{
             return this;
         }
 
-        /// <summary>
-        /// Registers custom local data source, e.g. SQL query
-        /// </summary>
-        /// <param name="dataSourceName">Report data source name.</param>
-        /// <param name="dataSource">The data.</param>
-        /// <returns></returns>
-        public IMvcReportViewerOptions LocalDataSource<T>(string dataSourceName, T dataSource)
-        {
-            var provider = LocalReportDataSourceProviderFactory.Current.Create();
-            provider.Add(ControlId, dataSourceName, dataSource);
 
-            return this;
+        public IMvcReportViewerOptions LocalSubReportDataSource(ISubReportDataSource dataSource)
+        {
+            throw new NotImplementedException();
         }
     }
 }

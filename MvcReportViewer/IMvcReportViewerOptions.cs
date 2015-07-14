@@ -10,34 +10,6 @@ namespace MvcReportViewer
     public interface IMvcReportViewerOptions : IHtmlString
     {
         /// <summary>
-        /// Sets the path to the report on the server.
-        /// </summary>
-        /// <param name="reportPath">The path to the report on the server.</param>
-        /// <returns>An instance of MvcViewerOptions class.</returns>
-        IMvcReportViewerOptions ReportPath(string reportPath);
-
-        /// <summary>
-        /// Sets the URL for the report server.
-        /// </summary>
-        /// <param name="reportServerUrl">The URL for the report server.</param>
-        /// <returns>An instance of MvcViewerOptions class.</returns>
-        IMvcReportViewerOptions ReportServerUrl(string reportServerUrl);
-
-        /// <summary>
-        /// Sets the report server username.
-        /// </summary>
-        /// <param name="username">The report server username.</param>
-        /// <returns>An instance of MvcViewerOptions class.</returns>
-        IMvcReportViewerOptions Username(string username);
-
-        /// <summary>
-        /// Sets the report server password.
-        /// </summary>
-        /// <param name="password">The report server password.</param>
-        /// <returns>An instance of MvcViewerOptions class.</returns>
-        IMvcReportViewerOptions Password(string password);
-
-        /// <summary>
         /// Sets the report parameter properties for the report.
         /// </summary>
         /// <param name="reportParameters">The report parameter properties for the report.</param>
@@ -93,14 +65,8 @@ namespace MvcReportViewer
         /// <param name="dataSourceName">Report data source name.</param>
         /// <param name="dataSource">The data.</param>
         /// <returns></returns>
-        IMvcReportViewerOptions LocalDataSource(string dataSourceName, IDataSource dataSource);
+        IMvcReportViewerOptions LocalDataSource(IDataSource dataSource);
 
-        /// <summary>
-        /// Registers custom local data source, e.g. SQL query
-        /// </summary>
-        /// <param name="dataSourceName">Report data source name.</param>
-        /// <param name="dataSource">The data.</param>
-        /// <returns></returns>
-        IMvcReportViewerOptions LocalDataSource<T>(string dataSourceName, T dataSource);
+        IMvcReportViewerOptions LocalSubReportDataSource(ISubReportDataSource dataSource);
     }
 }

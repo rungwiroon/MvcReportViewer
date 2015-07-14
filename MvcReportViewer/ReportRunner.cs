@@ -13,9 +13,9 @@ namespace MvcReportViewer
     {
         private readonly ReportViewerParameters _viewerParameters = new ReportViewerParameters
             {
-                ReportServerUrl = ConfigurationManager.AppSettings[WebConfigSettings.Server],
-                Username = ConfigurationManager.AppSettings[WebConfigSettings.Username],
-                Password = ConfigurationManager.AppSettings[WebConfigSettings.Password],
+                //ReportServerUrl = ConfigurationManager.AppSettings[WebConfigSettings.Server],
+                //Username = ConfigurationManager.AppSettings[WebConfigSettings.Username],
+                //Password = ConfigurationManager.AppSettings[WebConfigSettings.Password],
                 IsReportRunnerExecution = true
             };
 
@@ -71,7 +71,7 @@ namespace MvcReportViewer
 
             _viewerParameters.ReportLoader = reportLoader;
 
-            reportLoader.SetViewerParamerters(_viewerParameters);
+            //reportLoader.SetViewerParamerters(_viewerParameters);
 
             ParseParameters(reportParameters);
         }
@@ -90,7 +90,7 @@ namespace MvcReportViewer
 
         public FileStreamResult Run()
         {
-            Validate();
+            //Validate();
 
             ViewerParameters.ControlSettings = new ControlSettings();
             ViewerParameters.ControlSettings.EnableExternalImages = true;
@@ -183,18 +183,18 @@ namespace MvcReportViewer
             }
         }
 
-        private void Validate()
-        {
-            if (_viewerParameters.ProcessingMode == ProcessingMode.Remote && string.IsNullOrEmpty(_viewerParameters.ReportServerUrl))
-            {
-                throw new MvcReportViewerException("Report Server is not specified.");
-            }
+        //private void Validate()
+        //{
+        //    if (_viewerParameters.ProcessingMode == ProcessingMode.Remote && string.IsNullOrEmpty(_viewerParameters.ReportServerUrl))
+        //    {
+        //        throw new MvcReportViewerException("Report Server is not specified.");
+        //    }
 
-            if (string.IsNullOrEmpty(_viewerParameters.MainReportResourceName) 
-                && string.IsNullOrEmpty(_viewerParameters.ReportPath))
-            {
-                throw new MvcReportViewerException("Report is not specified.");
-            }
-        }
+        //    if (string.IsNullOrEmpty(_viewerParameters.MainReportResourceName)
+        //        && string.IsNullOrEmpty(_viewerParameters.ReportPath))
+        //    {
+        //        throw new MvcReportViewerException("Report is not specified.");
+        //    }
+        //}
     }
 }

@@ -93,6 +93,9 @@
     <Compile Include="..\MvcReportViewer\DataSource.cs">
       <Link>DataSource.cs</Link>
     </Compile>
+    <Compile Include="..\MvcReportViewer\HtmlFormFieldBuilder.cs">
+      <Link>HtmlFormFieldBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\MvcReportViewer\IgnoreCaseExtensions.cs">
       <Link>IgnoreCaseExtensions.cs</Link>
     </Compile>
@@ -126,6 +129,9 @@
     </Compile>
     <Compile Include="..\MvcReportViewer\ReportLoader.cs">
       <Link>ReportLoader.cs</Link>
+    </Compile>
+    <Compile Include="..\MvcReportViewer\ReportLoaderFactory.cs">
+      <Link>ReportLoaderFactory.cs</Link>
     </Compile>
     <Compile Include="..\MvcReportViewer\ReportRunner.cs">
       <Link>ReportRunner.cs</Link>

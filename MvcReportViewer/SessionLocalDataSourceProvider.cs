@@ -28,6 +28,7 @@ namespace MvcReportViewer
             var key = GetSessionValueKey(reportControlId);
             var dataSources = _session[key] as List<IDataSource>;
             dataSources = dataSources ?? new List<IDataSource>();
+            dataSources.Add(dataSource);
 
             _session[key] = dataSources;
         }

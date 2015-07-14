@@ -27,7 +27,7 @@ namespace MvcReportViewer
             reportViewer.ProcessingMode = ProcessingMode.Local;
             var localReport = reportViewer.LocalReport;
 
-            parameters.ReportLoader.LoadReport(reportViewer);
+            parameters.ReportLoader.LoadReportTo(reportViewer);
 
             if(parameters.ControlSettings != null &&  parameters.ControlSettings.EnableExternalImages != null && parameters.ControlSettings.EnableExternalImages.Value)
                 localReport.EnableExternalImages = true;
@@ -62,27 +62,8 @@ namespace MvcReportViewer
         {
             reportViewer.ProcessingMode = ProcessingMode.Remote;
             var serverReport = reportViewer.ServerReport;
-            serverReport.ReportServerUrl = new Uri(parameters.ReportServerUrl);
 
-            serverReport.ReportPath = parameters.ReportPath;          
-            
-            if (!string.IsNullOrEmpty(parameters.Username))
-            {
-                if (parameters.IsAzureSSRS)
-                {
-                    var server = serverReport.ReportServerUrl.Host;
-                    serverReport.ReportServerCredentials = new AzureReportServerCredentials(
-                        parameters.Username,
-                        parameters.Password,
-                        server);
-                }
-                else
-                {
-                    serverReport.ReportServerCredentials = new ReportServerCredentials(
-                        parameters.Username,
-                        parameters.Password);
-                }
-            }
+            parameters.ReportLoader.LoadReportTo(reportViewer);
 
             if (parameters.ReportParameters.Count > 0)
             {

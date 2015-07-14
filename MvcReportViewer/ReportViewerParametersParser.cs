@@ -20,48 +20,32 @@ namespace MvcReportViewer
             var settinsManager = new ControlSettingsManager(isEncrypted);
 
             var parameters = InitializeDefaults();
-            ResetDefaultCredentials(queryString, parameters);
+            //ResetDefaultCredentials(queryString, parameters);
             parameters.ControlSettings = settinsManager.Deserialize(queryString);
 
             foreach (var key in queryString.AllKeys)
             {
                 var urlParam = queryString[key];
-                if (key.EqualsIgnoreCase(UriParameters.ReportPath))
-                {
-                    parameters.ReportPath = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
-                }
-                else if (key.EqualsIgnoreCase(UriParameters.ReportAssemblyName))
-                {
-                    parameters.ReportAssemblyName = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
-                }
-                else if (key.EqualsIgnoreCase(UriParameters.ReportEmbeddedName))
-                {
-                    parameters.MainReportResourceName = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
-                }
-                else if (key.EqualsIgnoreCase(UriParameters.ControlId))
+                
+                if (key.EqualsIgnoreCase(UriParameters.ControlId))
                 {
                     var parameter = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
                     parameters.ControlId = Guid.Parse(parameter);
+                }
+                else if(key.EqualsIgnoreCase(UriParameters.ReportType))
+                {
+                    var parameter = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
+                    parameters.ReportLoaderType = int.Parse(parameter);
                 }
                 else if (key.EqualsIgnoreCase(UriParameters.ProcessingMode))
                 {
                     var parameter = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
                     parameters.ProcessingMode = (ProcessingMode)Enum.Parse(typeof(ProcessingMode), parameter);
                 }
-                else if (key.EqualsIgnoreCase(UriParameters.ReportServerUrl))
-                {
-                    parameters.ReportServerUrl = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
-                }
-                else if (key.EqualsIgnoreCase(UriParameters.Username))
-                {
-                    parameters.Username = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
-                }
-                else if (key.EqualsIgnoreCase(UriParameters.Password))
-                {
-                    parameters.Password = isEncrypted ? SecurityUtil.Decrypt(urlParam) : urlParam;
-                }
                 else if (!settinsManager.IsControlSetting(key))
                 {
+                    if (key.StartsWith("_")) continue;
+
                     var values = queryString.GetValues(key);
                     if (values != null)
                     {
@@ -88,16 +72,18 @@ namespace MvcReportViewer
                 }
             }
 
-            if (parameters.ProcessingMode == ProcessingMode.Remote 
-                && string.IsNullOrEmpty(parameters.ReportServerUrl))
-            {
-                throw new MvcReportViewerException("Report Server is not specified.");
-            }
+            parameters.ReportLoader = ReportLoaderFactory.CreateByRequestData(parameters.ReportLoaderType, queryString, isEncrypted);
 
-            if (string.IsNullOrEmpty(parameters.MainReportResourceName) && string.IsNullOrEmpty(parameters.ReportPath))
-            {
-                throw new MvcReportViewerException("Report is not specified.");
-            }
+            //if (parameters.ProcessingMode == ProcessingMode.Remote 
+            //    && string.IsNullOrEmpty(parameters.ReportServerUrl))
+            //{
+            //    throw new MvcReportViewerException("Report Server is not specified.");
+            //}
+
+            //if (string.IsNullOrEmpty(parameters.MainReportResourceName) && string.IsNullOrEmpty(parameters.ReportPath))
+            //{
+            //    throw new MvcReportViewerException("Report is not specified.");
+            //}
 
             return parameters;
         }
@@ -146,15 +132,15 @@ namespace MvcReportViewer
             return isEncrypted;
         }
 
-        private static void ResetDefaultCredentials(NameValueCollection queryString, ReportViewerParameters parameters)
-        {
-            if (queryString.ContainsKeyIgnoreCase(UriParameters.Username) ||
-                queryString.ContainsKeyIgnoreCase(UriParameters.Password))
-            {
-                parameters.Username = string.Empty;
-                parameters.Password = string.Empty;
-            }
-        }
+        //private static void ResetDefaultCredentials(NameValueCollection queryString, ReportViewerParameters parameters)
+        //{
+        //    if (queryString.ContainsKeyIgnoreCase(UriParameters.Username) ||
+        //        queryString.ContainsKeyIgnoreCase(UriParameters.Password))
+        //    {
+        //        parameters.Username = string.Empty;
+        //        parameters.Password = string.Empty;
+        //    }
+        //}
 
         private ReportViewerParameters InitializeDefaults()
         {
@@ -164,12 +150,12 @@ namespace MvcReportViewer
             {
                 isAzureSSRSValue = false;
             }
-            
+
             var parameters = new ReportViewerParameters
                 {
-                    ReportServerUrl = ConfigurationManager.AppSettings[WebConfigSettings.Server],
-                    Username = ConfigurationManager.AppSettings[WebConfigSettings.Username],
-                    Password = ConfigurationManager.AppSettings[WebConfigSettings.Password],
+                    //ReportServerUrl = ConfigurationManager.AppSettings[WebConfigSettings.Server],
+                    //Username = ConfigurationManager.AppSettings[WebConfigSettings.Username],
+                    //Password = ConfigurationManager.AppSettings[WebConfigSettings.Password],
                     IsAzureSSRS = isAzureSSRSValue
                 };
 

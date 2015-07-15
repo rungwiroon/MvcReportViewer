@@ -10,5 +10,7 @@ namespace MvcReportViewer.Example.Models
     public class EmbeddedReportModel
     {
         public IEnumerable<ProductModel> Products { get; set; }
+
+        public IEnumerable<ProductDetailModel> ProductDetails { get; set; }
     }
 }

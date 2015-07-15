@@ -475,9 +475,13 @@ if (formElement{0}) {{
         }
 
 
-        public IMvcReportViewerOptions LocalSubReportDataSource(ISubReportDataSource dataSource)
+        public IMvcReportViewerOptions LocalSubReportDataSource(IEnumerable<ISubReportDataSource> dataSource)
         {
-            throw new NotImplementedException();
+            var provider = LocalReportDataSourceProviderFactory.Current.Create();
+
+            provider.Add(ControlId, dataSource);
+
+            return this;
         }
     }
 }

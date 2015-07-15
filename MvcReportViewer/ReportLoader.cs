@@ -92,7 +92,7 @@ namespace MvcReportViewer
 
         public IEnumerable<SubReportResourceName> SubReportResourceNames { get; private set; }
 
-        private string _subReportNames;
+        //private string _subReportNames;
 
         public LocalReportAssemblyResourceLoader(string assemblyName, string mainReportEmbeddedResourceName, IEnumerable<SubReportResourceName> subReportEmbeddedResourceNames = null)
         {
@@ -109,7 +109,22 @@ namespace MvcReportViewer
             var urlParam2 = queryString[UriParameters.ReportResourceName];
             MainReportResourceName = isEncrypted ? SecurityUtil.Decrypt(urlParam2) : urlParam2;
 
-            //var urlParam3 = queryString[UriParameters.SubReportResourceNames];
+            var subReportValues = queryString.GetValues(UriParameters.SubReportResourceNames);
+
+            if (subReportValues == null || !subReportValues.Any()) return;
+
+            var subReportList = new List<SubReportResourceName>();
+
+            foreach(var subReportResourceName in subReportValues)
+            {
+                var sr = subReportResourceName.Split(':');
+                var reportName = sr[0];
+                var resourceName = sr[1];
+
+                subReportList.Add(new SubReportResourceName(reportName, resourceName));
+            }
+
+            SubReportResourceNames = subReportList;
         }
 
         public void LoadReportTo(ReportViewer reportViewer)
@@ -126,8 +141,6 @@ namespace MvcReportViewer
             {
                 Stream subReportStream = assembly.GetManifestResourceStream(subReport.ResourceName);
                 localReport.LoadSubreportDefinition(subReport.ReportName, subReportStream);
-
-                _subReportNames += subReport.ResourceName + ";";
             }
         }
 
@@ -136,7 +149,11 @@ namespace MvcReportViewer
             html.AddField(UriParameters.ReportType, (int)ReportLoaderType.LocalReportAssemblyResourceLoader);
             html.AddField(UriParameters.ReportAssemblyName, AssemblyName);
             html.AddField(UriParameters.ReportResourceName, MainReportResourceName);
-            html.AddField(UriParameters.SubReportResourceNames, MainReportResourceName);
+
+            if (SubReportResourceNames == null) return;
+
+            foreach (var subReport in SubReportResourceNames)
+                html.AddField(UriParameters.SubReportResourceNames, subReport.ReportName + ":" + subReport.ResourceName);
         }
 
         public void BuildViewerUri(NameValueCollection query)
@@ -144,7 +161,11 @@ namespace MvcReportViewer
             query[UriParameters.ReportType] = ((int)ReportLoaderType.LocalReportAssemblyResourceLoader).ToString();
             query[UriParameters.ReportAssemblyName] = AssemblyName;
             query[UriParameters.ReportResourceName] = MainReportResourceName;
-            query[UriParameters.SubReportResourceNames] = _subReportNames;
+            
+            if (SubReportResourceNames == null) return;
+
+            foreach (var subReport in SubReportResourceNames)
+                query.Add(UriParameters.SubReportResourceNames, subReport.ReportName + ":" + subReport.ResourceName);
         }
     }
 

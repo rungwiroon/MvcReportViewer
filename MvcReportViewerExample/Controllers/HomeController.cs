@@ -136,6 +136,17 @@ namespace MvcReportViewer.Example.Controllers
             return View(model);
         }
 
+        public ActionResult FluentEmbeddedSubReport()
+        {
+            var model = new EmbeddedReportModel()
+            {
+                Products = GetProducts2(),
+                ProductDetails = GetProductDetails()
+            };
+
+            return View(model);
+        }
+
         public ActionResult LocalEmbeddedReports()
         {
             return this.Report(

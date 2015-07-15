@@ -43,6 +43,16 @@ namespace MvcReportViewer
             throw new NotSupportedException();
         }
 
+        public void Add(Guid reportControlId, ISubReportDataSource dataSources)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Add(Guid reportControlId, IEnumerable<ISubReportDataSource> dataSources)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<ReportDataSource> Get(Guid reportControlId)
         {
             var key = GetSessionValueKey(reportControlId);
@@ -89,6 +99,11 @@ namespace MvcReportViewer
             }
 
             return dataSources;
+        }
+
+        public IEnumerable<ISubReportDataSource> GetSubReport(Guid reportControlId, string reportPath)
+        {
+            throw new NotImplementedException();
         }
 
         private ConnectionStringSettings GetConnectionString()

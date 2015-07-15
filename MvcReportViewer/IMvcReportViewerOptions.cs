@@ -67,6 +67,6 @@ namespace MvcReportViewer
         /// <returns></returns>
         IMvcReportViewerOptions LocalDataSource(IDataSource dataSource);
 
-        IMvcReportViewerOptions LocalSubReportDataSource(ISubReportDataSource dataSource);
+        IMvcReportViewerOptions LocalSubReportDataSource(IEnumerable<ISubReportDataSource> dataSource);
     }
 }

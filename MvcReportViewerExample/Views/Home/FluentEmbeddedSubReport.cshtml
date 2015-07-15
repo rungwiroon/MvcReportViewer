@@ -3,6 +3,7 @@
 @using Microsoft.Reporting.WebForms;
 @using MvcReportViewer;
 @using MvcReportViewer.Example.Models;
+@using ReportLibrary.Example;
 
 @model EmbeddedReportModel
 
@@ -27,9 +28,24 @@
 }
 
 @{
-    var reportAssemblyName = "ReportLibraryExample";
-    var reportEmbeddedName = "ReportLibrary.Example.ReportFiles.ProductReport.rdlc";
-    var parameters = new { Parameter1 = "Test", Parameter2 = 123 };
+    var loader = new LocalReportAssemblyResourceLoader(
+        "ReportLibraryExample", 
+        "ReportLibrary.Example.ReportFiles.ProductWithDetail.rdlc",
+        new SubReportResourceName[]
+        {
+            new SubReportResourceName("ProductDetailReport", "ReportLibrary.Example.ReportFiles.ProductDetailReport.rdlc")
+        });
+        
+    var dataSource = new EnumerableDataSource("Products", Model.Products);
+    var subReportDataSource = new ISubReportDataSource[]
+        {
+            new SubReportEnumerableDataSource<ProductDetailModel>(
+                "ProductDetailReport",
+                new GenericEnumerableDataSource<ProductDetailModel>("ProductDetails", Model.ProductDetails), 
+                    (parameters, data) => data.Where(pd => pd.ProductId == int.Parse((parameters["ProductId"].Values[0])))) 
+        };
+        
+    var parameters1 = new { Parameter1 = "Test", Parameter2 = 123 };
 
     var attributes = new { Height = 900, Width = 900, style = "border: none" };
     
@@ -45,4 +61,4 @@
         };
 }
 
-@Html.MvcReportViewerFluent(reportAssemblyName, reportEmbeddedName).ProcessingMode(ProcessingMode.Local).ReportParameters(parameters).LocalDataSource2("Products", Model.Products).LocalSubReportDataSource().Attributes(attributes).ControlSettings(settings)
+@Html.MvcReportViewerFluent(loader).ProcessingMode(ProcessingMode.Local).ReportParameters(parameters1).LocalDataSource(dataSource).LocalSubReportDataSource(subReportDataSource).Attributes(attributes).ControlSettings(settings)

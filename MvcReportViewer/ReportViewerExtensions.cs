@@ -3,6 +3,7 @@ using Microsoft.Reporting.WebForms;
 using System.Web.UI.WebControls;
 using System.Reflection;
 using System.IO;
+using System.Linq;
 
 namespace MvcReportViewer
 {
@@ -53,6 +54,19 @@ namespace MvcReportViewer
                 {
                     localReport.DataSources.Add(dataSource);
                 }
+
+                localReport.SubreportProcessing += (sender, e) =>
+                {
+                    //var dataSourceProvider = LocalReportDataSourceProviderFactory.Current.Create();
+                    var subReportDataSources = dataSourceProvider.GetSubReport((Guid)parameters.ControlId, e.ReportPath);
+
+                    foreach (var dataSource in subReportDataSources)
+                    {
+                        var reportDataSource = dataSource.CreateDataSource(e.Parameters);
+
+                        e.DataSources.Add(reportDataSource);
+                    }
+                };
             }
 
             localReport.ShowDetailedSubreportMessages = true;

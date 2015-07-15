@@ -31,17 +31,7 @@ namespace MvcReportViewer
     {
         public string ReportPath { get; private set; }
 
-        public LocalReportLoader()
-        {
-
-        }
-
         public LocalReportLoader(string reportPath)
-        {
-            SetByPath(reportPath);
-        }
-
-        public void SetByPath(string reportPath)
         {
             ReportPath = reportPath;
         }

@@ -11,26 +11,9 @@ namespace MvcReportViewer
         public ReportViewerParameters()
         {
             ReportParameters = new Dictionary<string, ReportParameter>();
-            //ReportLoaderParameters = new Dictionary<string, object>();
         }
 
         public int ReportLoaderType { get; set; }
-
-        //public string ReportServerUrl { get; set; }
-
-        //public string Username { get; set; }
-
-        //public string Password { get; set; }
-
-        //public string ReportPath { get; set; }
-
-        //public string ReportAssemblyName { get; set; }
-
-        //public string MainReportResourceName { get; set; }
-
-        //public string SubReportResourceNames { get; set; }
-
-        //public Dictionary<string, object> ReportLoaderParameters { get; set; }
 
         public Guid? ControlId { get; set; }
 

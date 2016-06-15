@@ -106,7 +106,7 @@ namespace MvcReportViewer
                 string extension;
 
                 output = reportViewer.ServerReport.Render(
-                    ReportFormat.ToString(),
+                    ReportFormat.ToString().ToUpper(),
                     "<DeviceInfo></DeviceInfo>",
                     null,
                     out mimeType,
@@ -134,7 +134,7 @@ namespace MvcReportViewer
                 string extension;
 
                 var report = localReport.Render(
-                    ReportFormat.ToString(), 
+                    ReportFormat.ToString().ToUpper(), 
                     null,
                     out mimeType,
                     out encoding,
@@ -145,7 +145,9 @@ namespace MvcReportViewer
                 output = new MemoryStream(report);
             }
 
-            return new FileStreamResult(output, mimeType);
+            var fileStreamResult = new FileStreamResult(output, mimeType);
+
+            return fileStreamResult;
         }
 
         void localReport_SubreportProcessing(object sender, SubreportProcessingEventArgs e)

@@ -165,7 +165,7 @@ namespace MvcReportViewer.Example.Controllers
         public ActionResult LocalReportWithSubReport()
         {
             return this.Report(
-                ReportFormat.Excel,
+                ReportFormat.ExcelOpenXML,
 
                 new LocalReportAssemblyResourceLoader(
                     "ReportLibraryExample",
